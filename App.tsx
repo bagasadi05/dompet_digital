@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
 import AuthPage from './components/AuthPage';
@@ -6,6 +6,26 @@ import { useTheme } from './hooks/useTheme';
 import { useAuth } from './contexts/AuthContext';
 import { useData } from './contexts/DataContext';
 import DashboardSkeleton from './components/Skeletons/DashboardSkeleton';
+
+// Capacitor Plugins
+import { StatusBar, Style } from '@capacitor/status-bar';
+import { SplashScreen } from '@capacitor/splash-screen';
+import { App as CapacitorApp } from '@capacitor/app';
+
+// Initialize native plugins
+const initializeNativePlugins = async () => {
+  try {
+    // Hide splash screen after app loads
+    await SplashScreen.hide();
+
+    // Setup status bar
+    await StatusBar.setStyle({ style: Style.Dark });
+    await StatusBar.setBackgroundColor({ color: '#10B981' });
+  } catch (error) {
+    // Plugins not available (web environment)
+    console.log('Running in web environment, native plugins not available');
+  }
+};
 
 // Lazy load pages for better performance
 const Dashboard = lazy(() => import('./components/Dashboard'));
@@ -29,6 +49,24 @@ const App: React.FC = () => {
   const [theme, toggleTheme] = useTheme();
   const { user, loading: authLoading } = useAuth();
   const { loading: dataLoading } = useData();
+
+  // Initialize Capacitor plugins on mount
+  useEffect(() => {
+    initializeNativePlugins();
+
+    // Handle Android back button
+    const backButtonListener = CapacitorApp.addListener('backButton', ({ canGoBack }) => {
+      if (canGoBack) {
+        window.history.back();
+      } else {
+        CapacitorApp.exitApp();
+      }
+    });
+
+    return () => {
+      backButtonListener.then(listener => listener.remove());
+    };
+  }, []);
 
   // Auth loading state
   if (authLoading) {
