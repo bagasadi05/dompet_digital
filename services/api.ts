@@ -2,13 +2,53 @@
 import { supabase } from './supabaseClient';
 import { Transaction, Budget, Goal, Bill, Category, SavingTip } from './types';
 
+// Supabase error type
+interface SupabaseError {
+    message: string;
+    code?: string;
+}
+
+// Database row types (snake_case from Supabase)
+interface TransactionRow {
+    id: string;
+    user_id: string;
+    type: string;
+    amount: number;
+    category: string;
+    description: string;
+    date: string;
+    goal_id: string | null;
+    bill_id: string | null;
+}
+
+interface BudgetRow {
+    id: string;
+    category: Category;
+    budget_limit: number;
+}
+
+interface GoalRow {
+    id: string;
+    name: string;
+    target_amount: number;
+    target_date: string;
+}
+
+interface BillRow {
+    id: string;
+    name: string;
+    amount: number;
+    due_date: string;
+    frequency?: 'once' | 'weekly' | 'monthly' | 'yearly';
+}
+
 // Helper untuk menangani error dari Supabase
-const handleSupabaseError = ({ error, data }: { error: any, data: any }, context: string) => {
+const handleSupabaseError = <T>({ error, data }: { error: SupabaseError | null, data: T | null }, context: string): T => {
     if (error) {
         console.error(`Error in ${context}:`, error.message || error);
         throw error;
     }
-    return data;
+    return data as T;
 }
 
 // --- Transactions API ---
@@ -18,23 +58,31 @@ const getTransactions = async (userId: string): Promise<Transaction[]> => {
         .select('*')
         .eq('user_id', userId)
         .order('date', { ascending: false });
-    const transactions = handleSupabaseError({ data, error }, 'getTransactions');
+    const transactions = handleSupabaseError<TransactionRow[]>({ data, error }, 'getTransactions');
     // Map snake_case to camelCase
-    return transactions.map((tx: any) => ({
+    return transactions.map((tx) => ({
         ...tx,
-        goalId: tx.goal_id,
-        billId: tx.bill_id,
+        goalId: tx.goal_id ?? undefined,
+        billId: tx.bill_id ?? undefined,
         date: tx.date.split('T')[0]
-    }));
+    })) as Transaction[];
 };
 
 const addTransaction = async (tx: Omit<Transaction, 'id'> & { user_id: string }): Promise<Transaction | null> => {
-    const { goalId, billId, ...restOfTx } = tx;
+    // Explicitly destructure id to ensure it's NOT included in restOfTx (even if passed as "" or undefined)
+    // @ts-expect-error - id might exist in runtime even if Omit says no
+    const { id: _id, goalId, billId, ...restOfTx } = tx;
+
+    // Convert empty strings to null for UUID fields
+    const goal_id = goalId && goalId.trim() !== '' ? goalId : null;
+    const bill_id = billId && billId.trim() !== '' ? billId : null;
+
     const { data, error } = await supabase
         .from('transactions')
-        .insert({ ...restOfTx, goal_id: goalId, bill_id: billId })
+        .insert({ ...restOfTx, goal_id, bill_id })
         .select()
         .single();
+
     const newTx = handleSupabaseError({ data, error }, 'addTransaction');
     return newTx ? {
         ...newTx,
@@ -46,9 +94,12 @@ const addTransaction = async (tx: Omit<Transaction, 'id'> & { user_id: string })
 
 const updateTransaction = async (tx: Transaction): Promise<Transaction | null> => {
     const { id, goalId, billId, ...restOfTx } = tx;
+    // Convert empty strings to null for UUID fields (Supabase requires null, not "")
+    const goal_id = goalId && goalId.trim() !== '' ? goalId : null;
+    const bill_id = billId && billId.trim() !== '' ? billId : null;
     const { data, error } = await supabase
         .from('transactions')
-        .update({ ...restOfTx, goal_id: goalId, bill_id: billId })
+        .update({ ...restOfTx, goal_id, bill_id })
         .eq('id', id)
         .select()
         .single();
@@ -76,8 +127,8 @@ const getBudgets = async (userId: string): Promise<Budget[]> => {
         .from('budgets')
         .select('id, category, budget_limit')
         .eq('user_id', userId);
-    const budgets = handleSupabaseError({ data, error }, 'getBudgets');
-    return budgets.map((b: any) => ({ ...b, spent: 0 }));
+    const budgets = handleSupabaseError<BudgetRow[]>({ data, error }, 'getBudgets');
+    return budgets.map((b) => ({ ...b, spent: 0 }));
 };
 
 const addBudget = async (budget: Omit<Budget, 'id' | 'spent'> & { user_id: string }): Promise<Budget | null> => {
@@ -116,8 +167,8 @@ const getGoals = async (userId: string): Promise<Goal[]> => {
         .from('goals')
         .select('id, name, target_amount, target_date')
         .eq('user_id', userId);
-    const goals = handleSupabaseError({ data, error }, 'getGoals');
-    return goals.map((g: any) => ({ ...g, targetAmount: g.target_amount, targetDate: g.target_date.split('T')[0], currentAmount: 0 }));
+    const goals = handleSupabaseError<GoalRow[]>({ data, error }, 'getGoals');
+    return goals.map((g) => ({ ...g, targetAmount: g.target_amount, targetDate: g.target_date.split('T')[0], currentAmount: 0 }));
 };
 
 const addGoal = async (goal: Omit<Goal, 'id' | 'currentAmount'> & { user_id: string }): Promise<Goal | null> => {
@@ -161,8 +212,8 @@ const getBills = async (userId: string): Promise<Bill[]> => {
         .from('bills')
         .select('*') // Use wildcard select to be robust against missing columns
         .eq('user_id', userId);
-    const bills = handleSupabaseError({ data, error }, 'getBills');
-    return bills.map((b: any) => ({
+    const bills = handleSupabaseError<BillRow[]>({ data, error }, 'getBills');
+    return bills.map((b) => ({
         id: b.id,
         name: b.name,
         amount: b.amount,

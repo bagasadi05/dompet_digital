@@ -5,91 +5,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dompet Digital - Manajer Keuangan</title>
-  <meta name="theme-color" content="#1E3A8A">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22> Wallet
-</text></svg>">
+  <meta name="theme-color" content="#10B981">
+  <link rel="icon" type="image/png" href="/icons/icon-512.png">
+  <link rel="apple-touch-icon" href="/icons/icon-512.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Inter', 'sans-serif'],
-          },
-          colors: {
-            primary: {
-              light: '#2563EB',
-              DEFAULT: '#1E40AF',
-              dark: '#1E3A8A'
-            },
-            secondary: {
-              light: '#FBBF24',
-              DEFAULT: '#F59E0B',
-              dark: '#D97706'
-            },
-            success: '#10B981',
-            warning: '#F59E0B',
-            danger: '#EF4444',
-            'light-bg': '#F3F4F6',
-            'light-card': '#FFFFFF',
-            'light-text': '#111827',
-            'dark-bg': '#111827',
-            'dark-card': '#1F2937',
-            'dark-text': '#F3F4F6',
-          }
-        }
-      }
-    }
-  </script>
-  <style>
-    /* Global transitions for a smoother feel */
-    * {
-      transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, opacity 0.3s ease;
-    }
-
-    body {
-      font-family: 'Inter', sans-serif;
-    }
-
-    /* Interactive feedback for buttons and links */
-    button,
-    a {
-      transition: transform 0.1s ease, box-shadow 0.2s ease;
-    }
-
-    button:active,
-    a:active {
-      transform: scale(0.97);
-    }
-
-    /* Accessibility: Clearer focus state */
-    :focus-visible {
-      outline: 2px solid #2563EB !important;
-      outline-offset: 2px !important;
-      border-radius: 4px;
-    }
-
-    .dark :focus-visible {
-      outline-color: #FBBF24 !important;
-    }
-  </style>
-  <script type="importmap">
-{
-  "imports": {
-    "react": "https://esm.sh/react@^19.1.0",
-    "react-dom/": "https://esm.sh/react-dom@^19.1.0/",
-    "react/": "https://esm.sh/react@^19.1.0/",
-    "recharts": "https://esm.sh/recharts@^3.0.2",
-    "react-router-dom": "https://esm.sh/react-router-dom@^7.6.3",
-    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@^2.50.2",
-    "@google/genai": "https://esm.sh/@google/genai@^1.8.0"
-  }
-}
-</script>
+  <!-- Tailwind and dependencies are bundled by Vite - no CDN needed for production -->
   <link rel="stylesheet" href="/index.css">
 </head>
 

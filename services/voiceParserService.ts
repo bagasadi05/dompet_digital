@@ -1,9 +1,9 @@
 /**
  * Voice Parser Service
- * Uses AI to parse natural language into transaction data
+ * Uses Google Gemini AI to parse natural language into transaction data
  */
 
-const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
 
 export interface ParsedTransaction {
     success: boolean;
@@ -49,30 +49,29 @@ PENTING:
 - HANYA return JSON, tanpa penjelasan`;
 
 export async function parseVoiceInput(text: string): Promise<ParsedTransaction> {
-    const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY;
-    const model = import.meta.env.VITE_OPENROUTER_MODEL || 'xiaomi/mimo-v2-flash:free';
+    const apiKey = import.meta.env.VITE_GOOGLE_AI_API_KEY;
 
     if (!apiKey) {
-        return { success: false, error: 'API Key tidak ditemukan' };
+        return { success: false, error: 'Google AI API Key tidak ditemukan' };
     }
 
     try {
-        const response = await fetch(OPENROUTER_API_URL, {
+        const response = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${apiKey}`,
-                'Content-Type': 'application/json',
-                'HTTP-Referer': window.location.origin,
-                'X-Title': 'Dompet Digital - Voice Parser'
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                model: model,
-                messages: [
-                    { role: 'system', content: PARSE_PROMPT },
-                    { role: 'user', content: text }
-                ],
-                temperature: 0.1,
-                max_tokens: 256
+                contents: [{
+                    parts: [
+                        { text: PARSE_PROMPT },
+                        { text: `Input User: "${text}"` }
+                    ]
+                }],
+                generationConfig: {
+                    temperature: 0.1,
+                    responseMimeType: "application/json"
+                }
             })
         });
 
@@ -83,7 +82,7 @@ export async function parseVoiceInput(text: string): Promise<ParsedTransaction> 
         }
 
         const data = await response.json();
-        const content = data.choices?.[0]?.message?.content || '';
+        const content = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
         // Parse JSON from response
         const jsonMatch = content.match(/\{[\s\S]*\}/);

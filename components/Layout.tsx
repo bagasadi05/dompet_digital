@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import BottomNav from './BottomNav';
 import Sidebar from './Sidebar';
+import OfflineIndicator from './common/OfflineIndicator';
 import { useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useData } from '../contexts/DataContext';
@@ -123,6 +124,7 @@ const Layout: React.FC<LayoutProps> = ({ theme, toggleTheme, children }) => {
   const title = pageTitles[location.pathname] || 'Dompet Digital';
   const { notifications, markAsRead, markAllAsRead, addTransaction } = useData();
   const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const handleVoiceResult = async (result: ParsedTransaction) => {
     if (result.success && result.amount && result.description && result.type) {
@@ -143,24 +145,37 @@ const Layout: React.FC<LayoutProps> = ({ theme, toggleTheme, children }) => {
   };
 
   return (
-    /* Dark mode background updated to #0B1120 (Requirement 9.1) */
-    <div className="min-h-screen text-gray-900 dark:text-white bg-gray-50 dark:bg-[#0B1120]">
+    /* Premium Dark Mode Background - #0A0F1A */
+    <div className="min-h-screen text-gray-900 dark:text-white bg-gray-50 dark:bg-[#0A0F1A]">
+      {/* Offline Status Indicator */}
+      <OfflineIndicator />
+
       {/* Desktop Sidebar */}
-      <Sidebar />
+      <Sidebar isCollapsed={!isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
 
       {/* Main Content Area */}
-      <div className="md:ml-64">
-        {/* Header */}
-        <header className="sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-800 transition-all duration-200">
-          <div className="px-4 md:px-6 h-16 flex justify-between items-center">
+      <div className={`transition-all duration-300 ${isSidebarOpen ? 'md:ml-72' : 'md:ml-20'}`}>
+        {/* Premium Glass Header */}
+        <header className="sticky top-0 z-30 bg-white/90 dark:bg-[#0A0F1A]/95 backdrop-blur-2xl border-b border-gray-200/30 dark:border-white/5 transition-all duration-300">
+          <div className="px-4 md:px-6 h-[60px] flex justify-between items-center">
             <div className="flex items-center gap-3">
-              {/* Mobile Logo */}
-              <div className="md:hidden w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-emerald-400 flex items-center justify-center shadow-lg shadow-primary/30">
-                <span className="text-white font-bold text-sm">💰</span>
+              {/* Premium Mobile Logo */}
+              <div className="md:hidden w-9 h-9 rounded-xl bg-gradient-to-br from-primary via-teal-400 to-emerald-400 flex items-center justify-center shadow-lg shadow-primary/40 border border-white/20">
+                <span className="text-white font-bold text-base">💰</span>
               </div>
-              <h1 className="text-lg font-bold text-gray-900 dark:text-white">{title}</h1>
+              <h1 className="text-lg font-bold text-gray-900 dark:text-white tracking-tight">{title}</h1>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <Link
+                to="/ai-chat"
+                className="relative p-2 text-gray-400 hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-all active:scale-95"
+                title="AI Assistant"
+              >
+                <div className="absolute top-2 right-2 w-2 h-2 bg-indigo-500 rounded-full animate-pulse"></div>
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" />
+                </svg>
+              </Link>
               <NotificationBell
                 notifications={notifications}
                 onMarkAsRead={markAsRead}
@@ -172,7 +187,7 @@ const Layout: React.FC<LayoutProps> = ({ theme, toggleTheme, children }) => {
         </header>
 
         {/* Main Content */}
-        <main className="p-4 md:p-6 pb-28 md:pb-6 animate-fadeIn">
+        <main className="p-4 md:p-6 pb-32 md:pb-6 animate-fadeIn overflow-x-hidden">
           {children}
         </main>
       </div>

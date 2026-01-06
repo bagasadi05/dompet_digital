@@ -59,7 +59,7 @@ const PlanningPage: React.FC = () => {
             </div>
 
             {/* Tab Navigation */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-1.5 flex gap-1">
+            <div className="bg-white dark:bg-gray-800 rounded-[20px] border border-gray-100 dark:border-white/5 shadow-sm p-2 flex gap-2">
                 {tabs.map(tab => {
                     const Icon = tab.icon;
                     const isActive = activeTab === tab.id;
@@ -67,12 +67,12 @@ const PlanningPage: React.FC = () => {
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
-                            className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-bold transition-all ${isActive
-                                    ? 'bg-primary text-white shadow-lg shadow-primary/30'
-                                    : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                            className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-2xl text-sm font-bold transition-all duration-300 ${isActive
+                                ? 'bg-gradient-to-r from-primary to-emerald-500 text-white shadow-lg shadow-primary/30 scale-[1.02]'
+                                : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white'
                                 }`}
                         >
-                            <Icon className="w-5 h-5" />
+                            <Icon className={`w-5 h-5 ${isActive ? 'drop-shadow-sm' : ''}`} />
                             <span className="hidden sm:inline">{tab.label}</span>
                         </button>
                     );

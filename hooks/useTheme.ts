@@ -2,17 +2,12 @@
 import { useState, useEffect, useCallback } from 'react';
 
 export const useTheme = (): [string, () => void] => {
-  const [theme, setTheme] = useState('light');
-
-  useEffect(() => {
+  const [theme, setTheme] = useState(() => {
     const storedTheme = localStorage.getItem('theme');
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    if (storedTheme) {
-      setTheme(storedTheme);
-    } else {
-      setTheme(prefersDark ? 'dark' : 'light');
-    }
-  }, []);
+    return storedTheme || (prefersDark ? 'dark' : 'light');
+  });
+
 
   useEffect(() => {
     if (theme === 'dark') {

@@ -20,16 +20,19 @@ const PlanningIcon: React.FC<{ className?: string }> = ({ className }) => (
     </svg>
 );
 
-const AiIcon: React.FC<{ className?: string }> = ({ className }) => (
+
+
+const ChartPieIcon: React.FC<{ className?: string }> = ({ className }) => (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6a7.5 7.5 0 1 0 7.5 7.5h-7.5V6Z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0 0 13.5 3v7.5Z" />
     </svg>
 );
 
-// Voice/Microphone Icon for center button
-const VoiceIcon: React.FC<{ className?: string }> = ({ className }) => (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 0 0 6-6v-1.5m-6 7.5a6 6 0 0 1-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 0 1-3-3V4.5a3 3 0 1 1 6 0v8.25a3 3 0 0 1-3 3Z" />
+// Plus Icon for center button (Quick Add Transaction)
+const PlusIcon: React.FC<{ className?: string }> = ({ className }) => (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
     </svg>
 );
 
@@ -42,7 +45,7 @@ const leftNavItems = [
 // Right nav items (after center button)
 const rightNavItems = [
     { path: '/planning', label: 'Rencana', icon: PlanningIcon },
-    { path: '/ai-chat', label: 'AI', icon: AiIcon },
+    { path: '/reports', label: 'Laporan', icon: ChartPieIcon },
 ];
 
 interface BottomNavProps {
@@ -63,37 +66,39 @@ interface BottomNavProps {
 const BottomNav: React.FC<BottomNavProps> = ({ onScanClick }) => {
     const navigate = useNavigate();
 
-    const handleVoiceClick = () => {
+    const handleAddClick = () => {
         if (onScanClick) {
             onScanClick();
         } else {
-            // Navigate to AI chat for voice input
+            // Navigate to AI chat for input
             navigate('/ai-chat');
         }
     };
 
     return (
-        // Fixed positioning with backdrop blur - Requirement 8.1, 8.5
-        <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white/90 dark:bg-[#0B1120]/90 backdrop-blur-xl border-t border-gray-200/50 dark:border-gray-700/50 md:hidden">
-            {/* Safe area padding - Requirement 8.5 */}
+        // Premium Glass Navbar - Fixed at bottom
+        <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-[#0A0F1A]/95 backdrop-blur-2xl border-t border-gray-200/30 dark:border-white/5 md:hidden">
+            {/* Safe area padding */}
             <div style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
-                <div className="flex justify-around items-center h-16 px-1 relative">
+                <div className="flex justify-around items-center h-[68px] px-2 relative">
                     {/* Left navigation items */}
                     {leftNavItems.map((item) => (
                         <NavLink
                             key={item.path}
                             to={item.path}
                             className={({ isActive }) =>
-                                `flex flex-col items-center justify-center gap-0.5 min-w-[56px] py-2 rounded-xl transition-all active:scale-95 ${isActive
+                                `flex flex-col items-center justify-center gap-1 min-w-[60px] py-2.5 rounded-2xl transition-all duration-200 active:scale-95 ${isActive
                                     ? 'text-primary'
-                                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+                                    : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'
                                 }`
                             }
                         >
                             {({ isActive }) => (
                                 <>
-                                    <item.icon className={`w-6 h-6 ${isActive ? 'text-primary' : ''}`} />
-                                    <span className={`text-[10px] font-medium ${isActive ? 'font-bold text-primary' : ''}`}>
+                                    <div className={`p-1.5 rounded-xl transition-all duration-200 ${isActive ? 'bg-primary/10 dark:bg-primary/20' : ''}`}>
+                                        <item.icon className={`w-6 h-6 transition-transform ${isActive ? 'text-primary scale-110' : ''}`} />
+                                    </div>
+                                    <span className={`text-[11px] font-semibold tracking-tight ${isActive ? 'text-primary' : ''}`}>
                                         {item.label}
                                     </span>
                                 </>
@@ -101,28 +106,31 @@ const BottomNav: React.FC<BottomNavProps> = ({ onScanClick }) => {
                         </NavLink>
                     ))}
 
-                    {/* Center elevated button - Requirement 8.3 */}
+                    {/* Premium Center Button */}
                     <div className="relative flex items-center justify-center w-16">
+                        {/* Glow effect - Adjusted to be more subtle and centered */}
+                        <div className="absolute -top-8 left-1/2 -translate-x-1/2 w-12 h-12 rounded-full bg-primary/40 blur-xl" />
                         <button
-                            onClick={handleVoiceClick}
+                            onClick={handleAddClick}
                             className="
-                                absolute -top-6
+                                absolute -top-10 left-1/2 -translate-x-1/2
                                 flex items-center justify-center
-                                w-14 h-14
-                                rounded-2xl
-                                bg-gradient-to-br from-primary to-emerald-400
+                                w-[64px] h-[64px]
+                                rounded-full
+                                bg-gradient-to-tr from-primary via-emerald-500 to-teal-400
                                 text-white
-                                shadow-lg shadow-primary/40
-                                hover:shadow-primary/60
-                                transition-all duration-200
+                                shadow-[0_8px_20px_-6px_rgba(16,185,129,0.5)]
+                                hover:shadow-[0_12px_24px_-8px_rgba(16,185,129,0.6)]
+                                hover:scale-105
+                                transition-all duration-300 cubic-bezier(0.34, 1.56, 0.64, 1)
                                 active:scale-95
+                                border-[3px] border-white dark:border-[#0A0F1A]
+                                z-50
                             "
-                            aria-label="Voice Assistant"
+                            aria-label="Tambah Transaksi AI"
                         >
-                            <VoiceIcon className="w-7 h-7" />
+                            <PlusIcon className="w-8 h-8 drop-shadow-sm" />
                         </button>
-                        {/* Placeholder untuk spacing */}
-                        <span className="text-[10px] text-transparent">Scan</span>
                     </div>
 
                     {/* Right navigation items */}
@@ -131,16 +139,18 @@ const BottomNav: React.FC<BottomNavProps> = ({ onScanClick }) => {
                             key={item.path}
                             to={item.path}
                             className={({ isActive }) =>
-                                `flex flex-col items-center justify-center gap-0.5 min-w-[56px] py-2 rounded-xl transition-all active:scale-95 ${isActive
+                                `flex flex-col items-center justify-center gap-1 min-w-[60px] py-2.5 rounded-2xl transition-all duration-200 active:scale-95 ${isActive
                                     ? 'text-primary'
-                                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+                                    : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'
                                 }`
                             }
                         >
                             {({ isActive }) => (
                                 <>
-                                    <item.icon className={`w-6 h-6 ${isActive ? 'text-primary' : ''}`} />
-                                    <span className={`text-[10px] font-medium ${isActive ? 'font-bold text-primary' : ''}`}>
+                                    <div className={`p-1.5 rounded-xl transition-all duration-200 ${isActive ? 'bg-primary/10 dark:bg-primary/20' : ''}`}>
+                                        <item.icon className={`w-6 h-6 transition-transform ${isActive ? 'text-primary scale-110' : ''}`} />
+                                    </div>
+                                    <span className={`text-[11px] font-semibold tracking-tight ${isActive ? 'text-primary' : ''}`}>
                                         {item.label}
                                     </span>
                                 </>

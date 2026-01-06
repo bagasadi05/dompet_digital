@@ -1,10 +1,10 @@
 /**
  * Receipt Scanning Service
- * Uses OpenRouter multimodal API to extract data from receipt images
+ * Uses Google AI Studio API (Gemini 2.5) for multimodal receipt image extraction
  */
 
-const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
-const VISION_MODEL = 'google/gemini-2.0-flash-001'; // Free multimodal model
+const GOOGLE_AI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+const GOOGLE_AI_API_KEY = import.meta.env.VITE_GOOGLE_AI_API_KEY || '';
 
 export interface ReceiptItem {
     name: string;
@@ -51,39 +51,43 @@ PENTING:
 - HANYA return JSON, tanpa markdown atau penjelasan lain`;
 
 export async function scanReceipt(imageBase64: string): Promise<ReceiptScanResult> {
-    const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY;
-
-    if (!apiKey) {
-        return { success: false, error: 'API Key tidak ditemukan' };
+    if (!GOOGLE_AI_API_KEY) {
+        return { success: false, error: 'Google AI API Key tidak ditemukan' };
     }
 
-    try {
-        // Ensure base64 has proper data URI prefix
-        const imageData = imageBase64.startsWith('data:')
-            ? imageBase64
-            : `data:image/jpeg;base64,${imageBase64}`;
+    // Create abort controller with 30s timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
 
-        const response = await fetch(OPENROUTER_API_URL, {
+    try {
+        // Extract base64 data without the data URI prefix
+        const base64Data = imageBase64.includes(',')
+            ? imageBase64.split(',')[1]
+            : imageBase64;
+
+        console.log('[Receipt Scan] Sending request to Gemini API...');
+        const response = await fetch(`${GOOGLE_AI_API_URL}?key=${GOOGLE_AI_API_KEY}`, {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${apiKey}`,
-                'Content-Type': 'application/json',
-                'HTTP-Referer': window.location.origin,
-                'X-Title': 'Dompet Digital - Receipt Scanner'
+                'Content-Type': 'application/json'
             },
+            signal: controller.signal,
             body: JSON.stringify({
-                model: VISION_MODEL,
-                messages: [
-                    {
-                        role: 'user',
-                        content: [
-                            { type: 'text', text: SCAN_PROMPT },
-                            { type: 'image_url', image_url: { url: imageData } }
-                        ]
-                    }
-                ],
-                temperature: 0.1,
-                max_tokens: 1024
+                contents: [{
+                    parts: [
+                        { text: SCAN_PROMPT },
+                        {
+                            inline_data: {
+                                mime_type: 'image/jpeg',
+                                data: base64Data
+                            }
+                        }
+                    ]
+                }],
+                generationConfig: {
+                    temperature: 0.1,
+                    maxOutputTokens: 1024
+                }
             })
         });
 
@@ -94,7 +98,7 @@ export async function scanReceipt(imageBase64: string): Promise<ReceiptScanResul
         }
 
         const data = await response.json();
-        const content = data.choices?.[0]?.message?.content || '';
+        const content = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
         // Parse JSON from response
         const jsonMatch = content.match(/\{[\s\S]*\}/);
@@ -108,6 +112,7 @@ export async function scanReceipt(imageBase64: string): Promise<ReceiptScanResul
             return { success: false, error: parsed.error };
         }
 
+        clearTimeout(timeoutId);
         return {
             success: true,
             merchant: parsed.merchant,
@@ -116,9 +121,17 @@ export async function scanReceipt(imageBase64: string): Promise<ReceiptScanResul
             total: parsed.total || 0,
             suggestedCategory: parsed.suggestedCategory || 'Lainnya'
         };
-    } catch (error: any) {
+    } catch (error: unknown) {
+        clearTimeout(timeoutId);
         console.error('[Receipt Scan] Error:', error);
-        return { success: false, error: error.message || 'Terjadi kesalahan saat scan' };
+
+        // Handle timeout/abort error
+        if (error instanceof Error && error.name === 'AbortError') {
+            return { success: false, error: 'Request timeout. Gambar mungkin terlalu besar atau koneksi lambat.' };
+        }
+
+        const errorMessage = error instanceof Error ? error.message : 'Terjadi kesalahan saat scan';
+        return { success: false, error: errorMessage };
     }
 }
 

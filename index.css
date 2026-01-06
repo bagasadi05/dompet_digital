@@ -23,40 +23,53 @@
 
 @layer base {
   :root {
-    /* Primary Colors - Vibrant Green */
-    --color-primary: #10B981;
-    --color-primary-dark: #059669;
+    /* Primary Colors - Premium Teal-Green */
+    --color-primary: #00D09C;
+    --color-primary-dark: #00B386;
     --color-secondary: #34D399;
     --color-secondary-light: #6EE7B7;
 
-    /* Light Mode - Premium Slate Theme */
+    /* Light Mode - Clean Minimal */
     --color-light-bg: #F8FAFC;
     --color-light-card: #FFFFFF;
     --color-light-text: #0F172A;
 
-    /* Dark Mode - Dashboard Redesign (Requirement 9) */
-    --color-dark-bg: #0B1120;
-    --color-dark-card: #1E293B;
+    /* Dark Mode - Premium Deep Navy */
+    --color-dark-bg: #0A0F1A;
+    --color-dark-card: #12182B;
     --color-dark-text: #F1F5F9;
-    --color-dark-border: #334155;
-    --color-dark-surface: #111827;
+    --color-dark-border: #1E2A45;
+    --color-dark-surface: #161D32;
 
     /* State Colors */
-    --color-success: #10B981;
-    --color-warning: #F59E0B;
-    --color-danger: #EF4444;
+    --color-success: #00D09C;
+    --color-warning: #FBBF24;
+    --color-danger: #F43F5E;
 
-    /* Financial Card Gradients */
-    --color-balance-from: #3B82F6;
-    --color-balance-to: #6366F1;
-    --color-income-from: #10B981;
+    /* Luxury Accent */
+    --color-gold: #F59E0B;
+    --color-gold-light: #FCD34D;
+
+    /* Financial Card Gradients - Richer */
+    --color-balance-from: #4F46E5;
+    --color-balance-to: #7C3AED;
+    --color-income-from: #00D09C;
     --color-income-to: #34D399;
-    --color-expense-from: #EF4444;
-    --color-expense-to: #F87171;
+    --color-expense-from: #F43F5E;
+    --color-expense-to: #FB7185;
+
+    /* Premium Shadows */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-glow-primary: 0 0 20px rgba(0, 208, 156, 0.3);
+    --shadow-glow-gold: 0 0 20px rgba(245, 158, 11, 0.3);
   }
 
   body {
-    @apply font-sans antialiased text-light-text bg-light-bg dark:text-dark-text dark:bg-dark-bg transition-colors duration-200;
+    @apply font-sans antialiased text-light-text bg-light-bg dark:text-dark-text dark:bg-dark-bg transition-colors duration-300;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 

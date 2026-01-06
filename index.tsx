@@ -5,6 +5,7 @@ import './index.css';
 import { AuthProvider } from './contexts/AuthContext';
 import { DataProvider } from './contexts/DataContext';
 import { ToastProvider } from './contexts/ToastContext';
+import { ChatProvider } from './contexts/ChatContext';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -16,7 +17,9 @@ root.render(
   <AuthProvider>
     <ToastProvider>
       <DataProvider>
-        <App />
+        <ChatProvider>
+          <App />
+        </ChatProvider>
       </DataProvider>
     </ToastProvider>
   </AuthProvider>

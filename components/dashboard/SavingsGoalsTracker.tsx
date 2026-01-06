@@ -66,17 +66,17 @@ const SavingsGoalsTracker: React.FC<SavingsGoalsTrackerProps> = ({
     };
 
     return (
-        <div className="p-4 rounded-2xl bg-white dark:bg-gray-800/80 backdrop-blur-sm border border-gray-100 dark:border-gray-700/50 shadow-sm">
+        <div className="p-4 rounded-2xl bg-white dark:bg-gray-800/80 backdrop-blur-sm border border-gray-100 dark:border-gray-700/50 shadow-sm overflow-hidden">
             {/* Header with "Kelola" link - Requirement 6.5 */}
-            <div className="flex justify-between items-center mb-4">
-                <h3 className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                    <TargetIcon className="w-5 h-5 text-primary" />
-                    Target Impian
+            <div className="flex justify-between items-center mb-3 gap-2">
+                <h3 className="font-bold text-gray-900 dark:text-white flex items-center gap-2 text-sm">
+                    <TargetIcon className="w-4 h-4 text-primary flex-shrink-0" />
+                    <span className="truncate">Target Impian</span>
                 </h3>
                 <Link
                     to="/planning"
                     onClick={onManageClick}
-                    className="text-sm text-primary hover:text-primary-dark font-medium transition-colors"
+                    className="text-xs text-primary hover:text-primary-dark font-medium transition-colors whitespace-nowrap flex-shrink-0"
                 >
                     Kelola
                 </Link>
@@ -155,7 +155,7 @@ const SavingsGoalsTracker: React.FC<SavingsGoalsTrackerProps> = ({
                     </div>
                 </div>
             ) : (
-                <GoalsEmptyState onCreateGoal={onCreateGoal || (() => {})} />
+                <GoalsEmptyState onCreateGoal={onCreateGoal || (() => { })} />
             )}
         </div>
     );

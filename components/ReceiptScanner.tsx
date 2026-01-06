@@ -26,15 +26,51 @@ const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onScanComplete, onClose
     const fileInputRef = useRef<HTMLInputElement>(null);
     const cameraInputRef = useRef<HTMLInputElement>(null);
 
+    // Compress image to reduce API request time
+    const compressImage = async (base64: string, maxWidth = 1024, quality = 0.7): Promise<string> => {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+
+                // Scale down if too large
+                if (width > maxWidth) {
+                    height = (height * maxWidth) / width;
+                    width = maxWidth;
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+
+                const ctx = canvas.getContext('2d');
+                ctx?.drawImage(img, 0, 0, width, height);
+
+                resolve(canvas.toDataURL('image/jpeg', quality));
+            };
+            img.onerror = () => resolve(base64); // Return original if error
+            img.src = base64;
+        });
+    };
+
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
+        // Reset input value immediately to allow re-selection of the same file
+        e.target.value = '';
+
         if (!file) return;
 
         try {
             const base64 = await fileToBase64(file);
-            setImagePreview(base64);
+            // Compress image for faster API processing
+            const compressed = await compressImage(base64);
+            console.log('[ReceiptScanner] Original size:', Math.round(base64.length / 1024), 'KB');
+            console.log('[ReceiptScanner] Compressed size:', Math.round(compressed.length / 1024), 'KB');
+            setImagePreview(compressed);
             setScanState('previewing');
         } catch (error) {
+            console.error('[ReceiptScanner] File read error:', error);
             setErrorMessage('Gagal membaca file gambar');
             setScanState('error');
         }
@@ -46,13 +82,21 @@ const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onScanComplete, onClose
         setScanState('scanning');
         setErrorMessage('');
 
-        const result = await scanReceipt(imagePreview);
-        setScanResult(result);
+        try {
+            console.log('[ReceiptScanner] Starting scan...');
+            const result = await scanReceipt(imagePreview);
+            console.log('[ReceiptScanner] Scan result:', result);
+            setScanResult(result);
 
-        if (result.success) {
-            setScanState('success');
-        } else {
-            setErrorMessage(result.error || 'Gagal memindai struk');
+            if (result.success) {
+                setScanState('success');
+            } else {
+                setErrorMessage(result.error || 'Gagal memindai struk');
+                setScanState('error');
+            }
+        } catch (error) {
+            console.error('[ReceiptScanner] Scan error:', error);
+            setErrorMessage('Terjadi kesalahan saat memindai. Silakan coba lagi.');
             setScanState('error');
         }
     };
@@ -68,6 +112,9 @@ const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onScanComplete, onClose
         setScanResult(null);
         setErrorMessage('');
         setScanState('idle');
+        // Reset file input values to ensure onChange fires on re-selection
+        if (cameraInputRef.current) cameraInputRef.current.value = '';
+        if (fileInputRef.current) fileInputRef.current.value = '';
     };
 
     return (

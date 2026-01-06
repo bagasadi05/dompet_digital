@@ -2,6 +2,11 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { SettingsIcon } from './common/Icons';
 
+interface SidebarProps {
+    isCollapsed: boolean;
+    toggleSidebar: () => void;
+}
+
 // Icons with fill support
 const HomeIcon: React.FC<{ className?: string; filled?: boolean }> = ({ className, filled }) => (
     <svg className={className} fill={filled ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={filled ? 0 : 1.5}>
@@ -74,44 +79,61 @@ const navItems = [
     { path: '/settings', label: 'Pengaturan', icon: SettingsIcon },
 ];
 
-const Sidebar: React.FC = () => {
+const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, toggleSidebar }) => {
     const location = useLocation();
 
     return (
-        <aside className="hidden md:flex fixed left-0 top-0 h-screen w-64 flex-col bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 z-40">
+        <aside className={`hidden md:flex fixed left-0 top-0 h-screen flex-col bg-white/80 dark:bg-black/80 backdrop-blur-xl border-r border-gray-100 dark:border-white/5 z-50 transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-72'}`}>
+            {/* Toggle Button */}
+            <button
+                onClick={toggleSidebar}
+                className="absolute -right-3 top-24 w-6 h-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full flex items-center justify-center shadow-md text-gray-500 hover:text-primary transition-colors z-50"
+            >
+                <svg className={`w-3 h-3 transition-transform duration-300 ${isCollapsed ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                </svg>
+            </button>
+
             {/* Logo */}
-            <div className="h-16 flex items-center gap-3 px-6 border-b border-gray-100 dark:border-gray-800">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-emerald-400 flex items-center justify-center shadow-lg shadow-primary/30">
-                    <span className="text-white text-lg">💰</span>
+            <div className={`h-24 flex items-center px-6 border-b border-gray-100 dark:border-white/5 ${isCollapsed ? 'justify-center px-0' : 'gap-4'}`}>
+                <div className="w-12 h-12 rounded-[20px] bg-gradient-to-br from-primary to-emerald-400 flex items-center justify-center shadow-lg shadow-primary/30 transform hover:scale-110 hover:rotate-3 transition-all duration-300 group shrink-0">
+                    <span className="text-white text-xl group-hover:scale-110 transition-transform">💰</span>
                 </div>
-                <div>
-                    <h1 className="text-lg font-bold text-gray-900 dark:text-white">Dompet Digital</h1>
-                    <p className="text-xs text-gray-500">Kelola keuanganmu</p>
-                </div>
+                {!isCollapsed && (
+                    <div className="animate-fadeIn">
+                        <h1 className="text-xl font-extrabold text-gray-900 dark:text-white tracking-tight">Dompet Digital</h1>
+                        <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Premium Budgeting</p>
+                    </div>
+                )}
             </div>
 
             {/* Navigation */}
-            <nav className="flex-1 py-6 px-4 space-y-2 overflow-y-auto">
+            <nav className="flex-1 py-8 px-3 space-y-2 overflow-y-auto custom-scrollbar overflow-x-hidden">
+                {!isCollapsed && <p className="px-4 text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-4 animate-fadeIn">Menu Utama</p>}
+
                 {navItems.map(({ path, label, icon: Icon }) => {
                     const isActive = location.pathname === path || (path !== '/' && location.pathname.startsWith(path));
                     return (
                         <Link
                             key={path}
                             to={path}
-                            className={`group flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${isActive
-                                ? 'bg-[#10B981]/10 text-[#10B981]'
-                                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white'
-                                }`}
+                            className={`group flex items-center px-3 py-3 rounded-[20px] transition-all duration-300 relative overflow-hidden ${isActive
+                                ? 'bg-gradient-to-r from-primary/10 to-teal-500/10 dark:from-primary/20 dark:to-teal-500/20 text-primary dark:text-primary shadow-sm'
+                                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-white'
+                                } ${isCollapsed ? 'justify-center' : 'gap-4'}`}
+                            title={isCollapsed ? label : undefined}
                         >
-                            <div className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all ${isActive
-                                ? 'bg-[#10B981] text-white shadow-lg shadow-[#10B981]/30'
-                                : 'bg-gray-100 dark:bg-gray-800 group-hover:bg-gray-200 dark:group-hover:bg-gray-700'
+                            {isActive && !isCollapsed && (
+                                <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-primary to-teal-400 rounded-l-[4px]"></div>
+                            )}
+                            <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all duration-300 shrink-0 ${isActive
+                                ? 'bg-gradient-to-br from-primary to-emerald-400 text-white shadow-lg shadow-primary/30 scale-105'
+                                : 'bg-white dark:bg-gray-800 border border-gray-100 dark:border-white/10 group-hover:bg-gray-50 dark:group-hover:bg-gray-700 group-hover:scale-105 group-hover:shadow-md'
                                 }`}>
-                                <Icon className="w-5 h-5" filled={isActive} />
+                                <Icon className={`w-5 h-5 transition-transform duration-300 ${isActive || 'group-hover:rotate-6'}`} filled={isActive} />
                             </div>
-                            <span className={`font-medium ${isActive ? 'font-bold' : ''}`}>{label}</span>
-                            {isActive && (
-                                <div className="ml-auto w-1.5 h-1.5 rounded-full bg-[#10B981]"></div>
+                            {!isCollapsed && (
+                                <span className={`font-bold text-sm tracking-wide whitespace-nowrap animate-fadeIn ${isActive ? 'translate-x-1' : 'group-hover:translate-x-1'} transition-transform duration-300`}>{label}</span>
                             )}
                         </Link>
                     );
@@ -119,12 +141,26 @@ const Sidebar: React.FC = () => {
             </nav>
 
             {/* Footer */}
-            <div className="p-4 border-t border-gray-100 dark:border-gray-800">
-                <div className="p-4 rounded-xl bg-gradient-to-br from-primary/10 to-emerald-500/10 dark:from-primary/20 dark:to-emerald-500/20">
-                    <p className="text-xs font-bold text-primary dark:text-primary mb-1">💡 Tips Keuangan</p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400">Catat setiap pengeluaran untuk kontrol keuangan yang lebih baik!</p>
+            {!isCollapsed && (
+                <div className="p-6 animate-fadeIn">
+                    <div className="p-5 rounded-[24px] bg-gradient-to-br from-gray-900 to-gray-800 dark:from-white/5 dark:to-white/10 border border-white/10 shadow-xl relative overflow-hidden group">
+                        <div className="absolute -right-4 -top-4 w-20 h-20 bg-primary/20 rounded-full blur-2xl group-hover:bg-primary/30 transition-all duration-500"></div>
+
+                        <div className="relative z-10">
+                            <div className="flex items-center gap-2 mb-2">
+                                <div className="p-1.5 bg-white/10 rounded-lg backdrop-blur-sm">
+                                    <span className="text-yellow-400 text-sm">💡</span>
+                                </div>
+                                <p className="text-xs font-bold text-white uppercase tracking-wider">Tips Harian</p>
+                            </div>
+                            <p className="text-xs font-medium text-gray-300 leading-relaxed">
+                                "Konsistensi adalah kunci. Catat pengeluaran kecil karena seringkali itu yang membocorkan anggaran."
+                            </p>
+                        </div>
+                    </div>
+                    <p className="text-[10px] text-center text-gray-400 mt-4 font-medium">v2.0.0 Premium Edition</p>
                 </div>
-            </div>
+            )}
         </aside>
     );
 };

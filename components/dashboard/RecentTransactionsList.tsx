@@ -63,17 +63,17 @@ const RecentTransactionsList: React.FC<RecentTransactionsListProps> = ({
     };
 
     return (
-        <div className="p-4 rounded-2xl bg-white dark:bg-gray-800/80 backdrop-blur-sm border border-gray-100 dark:border-gray-700/50 shadow-sm">
+        <div className="p-4 rounded-2xl bg-white dark:bg-gray-800/80 backdrop-blur-sm border border-gray-100 dark:border-gray-700/50 shadow-sm overflow-hidden">
             {/* Header with "Lihat Semua" link - Requirement 5.4 */}
-            <div className="flex justify-between items-center mb-4">
-                <h3 className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                    <WalletIcon className="w-5 h-5 text-primary" />
-                    Transaksi Terkini
+            <div className="flex justify-between items-center mb-3 gap-2">
+                <h3 className="font-bold text-gray-900 dark:text-white flex items-center gap-2 text-sm">
+                    <WalletIcon className="w-4 h-4 text-primary flex-shrink-0" />
+                    <span className="truncate">Transaksi Terkini</span>
                 </h3>
                 <Link
                     to="/transactions"
                     onClick={onViewAllClick}
-                    className="text-sm text-primary hover:text-primary-dark font-medium transition-colors"
+                    className="text-xs text-primary hover:text-primary-dark font-medium transition-colors whitespace-nowrap flex-shrink-0"
                 >
                     Lihat Semua
                 </Link>
@@ -86,8 +86,8 @@ const RecentTransactionsList: React.FC<RecentTransactionsListProps> = ({
                         <li
                             key={transaction.id}
                             className="
-                                flex justify-between items-center
-                                py-3 px-3 -mx-3
+                                flex justify-between items-center gap-2
+                                py-2.5 px-2 -mx-2
                                 rounded-xl
                                 hover:bg-gray-50 dark:hover:bg-gray-700/50
                                 transition-colors
@@ -95,10 +95,10 @@ const RecentTransactionsList: React.FC<RecentTransactionsListProps> = ({
                                 group
                             "
                         >
-                            <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-2.5 min-w-0 flex-1">
                                 {/* Transaction type icon - Requirement 5.2, 5.3 */}
                                 <div className={`
-                                    w-10 h-10 rounded-xl flex items-center justify-center
+                                    w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0
                                     transition-transform group-hover:scale-110
                                     ${transaction.type === 'income'
                                         ? 'bg-green-100 dark:bg-green-900/30'
@@ -106,18 +106,18 @@ const RecentTransactionsList: React.FC<RecentTransactionsListProps> = ({
                                     }
                                 `}>
                                     {transaction.type === 'income' ? (
-                                        <TrendingUpIcon className="w-5 h-5 text-green-600 dark:text-green-400" />
+                                        <TrendingUpIcon className="w-4 h-4 text-green-600 dark:text-green-400" />
                                     ) : (
-                                        <TrendingDownIcon className="w-5 h-5 text-red-600 dark:text-red-400" />
+                                        <TrendingDownIcon className="w-4 h-4 text-red-600 dark:text-red-400" />
                                     )}
                                 </div>
 
                                 {/* Transaction details */}
-                                <div className="min-w-0">
+                                <div className="min-w-0 flex-1">
                                     <p className="font-medium text-gray-900 dark:text-white text-sm truncate">
                                         {transaction.description}
                                     </p>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
                                         {transaction.category} • {formatDate(transaction.date)}
                                     </p>
                                 </div>
@@ -125,7 +125,7 @@ const RecentTransactionsList: React.FC<RecentTransactionsListProps> = ({
 
                             {/* Amount with color coding - Requirement 5.3 */}
                             <span className={`
-                                font-bold text-sm flex-shrink-0
+                                font-bold text-sm flex-shrink-0 text-right
                                 ${transaction.type === 'income'
                                     ? 'text-green-600 dark:text-green-400'
                                     : 'text-red-600 dark:text-red-400'
@@ -139,7 +139,7 @@ const RecentTransactionsList: React.FC<RecentTransactionsListProps> = ({
                 </ul>
             ) : (
                 // Empty state - Requirement 5.5
-                <TransactionsEmptyState onAddTransaction={onAddTransaction || (() => {})} />
+                <TransactionsEmptyState onAddTransaction={onAddTransaction || (() => { })} />
             )}
         </div>
     );

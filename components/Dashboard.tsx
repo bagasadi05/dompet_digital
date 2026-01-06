@@ -1,9 +1,10 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useData } from '../contexts/DataContext';
 import { useAuth } from '../contexts/AuthContext';
-import { TransactionType } from '../services/types';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+import { TransactionType, Category } from '../services/types';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import { useToast } from '../contexts/ToastContext';
 
 // Import dashboard components
 import WelcomeCard from './dashboard/WelcomeCard';
@@ -16,6 +17,10 @@ import DashboardSkeleton from './dashboard/DashboardSkeleton';
 import ErrorBoundary from './common/ErrorBoundary';
 import { BillsEmptyState } from './common/EmptyState';
 import type { Transaction as DashboardTransaction } from './dashboard/RecentTransactionsList';
+import ReceiptScanner from './ReceiptScanner';
+import { ReceiptScanResult } from '../services/receiptScanService';
+import Modal from './common/Modal';
+import CurrencyInput from './common/CurrencyInput';
 
 // Icons
 const ChartIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -48,6 +53,13 @@ const TargetIcon: React.FC<{ className?: string }> = ({ className }) => (
     </svg>
 );
 
+const CameraIcon: React.FC<{ className?: string }> = ({ className }) => (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z" />
+    </svg>
+);
+
 const COLORS = ['#10B981', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#14B8A6', '#F97316'];
 
 // Custom tooltip for pie chart
@@ -77,9 +89,18 @@ const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<
  * - Responsive design (Requirement 10)
  */
 const Dashboard: React.FC = () => {
-    const { transactions, goals, bills, loading } = useData();
+    const { transactions, goals, bills, loading, addTransaction } = useData();
     const { user } = useAuth();
+    const { showToast } = useToast();
     const navigate = useNavigate();
+
+    // Scanner state
+    const [isScannerOpen, setIsScannerOpen] = useState(false);
+    const [scanResult, setScanResult] = useState<ReceiptScanResult | null>(null);
+    const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+    const [scannedAmount, setScannedAmount] = useState(0);
+    const [scannedDescription, setScannedDescription] = useState('');
+    const [scannedCategory, setScannedCategory] = useState<Category>(Category.LAINNYA);
 
     const currentMonth = new Date().getMonth();
     const currentYear = new Date().getFullYear();
@@ -136,6 +157,36 @@ const Dashboard: React.FC = () => {
             .sort((a, b) => new Date(a.nextDueDate).getTime() - new Date(b.nextDueDate).getTime())
             .slice(0, 3);
     }, [bills]);
+
+    const handleScanResult = (result: ReceiptScanResult) => {
+        setScanResult(result);
+        const total = result.total || (result.items || []).reduce((sum, item) => sum + item.price, 0);
+        setScannedAmount(total);
+        setScannedDescription(`Struk ${result.merchant || 'Belanja'} - ${result.date ? new Date(result.date).toLocaleDateString() : 'Hari ini'}`);
+        // Default category or mapping logic
+        setScannedCategory(Category.BELANJA);
+        setIsScannerOpen(false);
+        setIsConfirmModalOpen(true);
+    };
+
+    const handleSaveScannedTransaction = async () => {
+        if (!user) return;
+
+        try {
+            await addTransaction({
+                amount: scannedAmount,
+                type: TransactionType.EXPENSE,
+                category: scannedCategory,
+                description: scannedDescription,
+                date: scanResult?.date || new Date().toISOString(),
+            });
+            showToast({ title: 'Transaksi dari struk berhasil disimpan!', type: 'success' });
+            setIsConfirmModalOpen(false);
+        } catch (error) {
+            console.error('Failed to save transaction:', error);
+            showToast({ title: 'Gagal menyimpan transaksi', type: 'error' });
+        }
+    };
 
     // Get primary savings goal
     const primaryGoal = goals.length > 0 ? {
@@ -210,58 +261,74 @@ const Dashboard: React.FC = () => {
                 {/* Quick Actions Grid - Requirement 4 */}
                 <QuickActionsGrid
                     onAddTransaction={() => navigate('/transactions')}
-                    onScanReceipt={() => navigate('/transactions')}
+                    onScanReceipt={() => setIsScannerOpen(true)}
                     onBills={() => navigate('/planning')}
                 />
 
                 {/* Two Column Layout for Charts and Lists */}
                 <div className="grid md:grid-cols-2 gap-5">
                     {/* Expense Pie Chart */}
-                    <div className="p-5 rounded-2xl bg-white dark:bg-gray-800/80 backdrop-blur-sm shadow-sm border border-gray-100 dark:border-gray-700/50">
-                        <div className="flex items-center justify-between mb-4">
-                            <h3 className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                                <ChartIcon className="w-5 h-5 text-primary" />
+                    <div className="p-4 rounded-2xl bg-white dark:bg-gray-800/80 backdrop-blur-sm shadow-sm border border-gray-100 dark:border-gray-700/50">
+                        <div className="flex items-center justify-between mb-3">
+                            <h3 className="font-bold text-gray-900 dark:text-white flex items-center gap-2 text-sm">
+                                <ChartIcon className="w-4 h-4 text-primary" />
                                 Ringkasan Pengeluaran
                             </h3>
-                            <Link to="/reports" className="text-sm text-primary hover:text-primary-dark font-medium transition-colors">Detail</Link>
+                            <Link to="/reports" className="text-xs text-primary hover:text-primary-dark font-medium transition-colors">Detail</Link>
                         </div>
                         {monthlyData.pieData.length > 0 ? (
-                            <div className="h-64">
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <PieChart>
-                                        <Pie
-                                            data={monthlyData.pieData}
-                                            cx="50%"
-                                            cy="50%"
-                                            innerRadius={50}
-                                            outerRadius={80}
-                                            fill="#8884d8"
-                                            paddingAngle={3}
-                                            dataKey="value"
-                                            strokeWidth={0}
+                            <>
+                                <div className="h-36">
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <PieChart>
+                                            <Pie
+                                                data={monthlyData.pieData}
+                                                cx="50%"
+                                                cy="50%"
+                                                innerRadius="40%"
+                                                outerRadius="75%"
+                                                fill="#8884d8"
+                                                paddingAngle={2}
+                                                dataKey="value"
+                                                strokeWidth={0}
+                                            >
+                                                {monthlyData.pieData.map((_, index) => (
+                                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                                ))}
+                                            </Pie>
+                                            <Tooltip content={<CustomTooltip />} />
+                                        </PieChart>
+                                    </ResponsiveContainer>
+                                </div>
+                                {/* Custom Legend - Mobile Optimized */}
+                                <div className="flex flex-wrap justify-center gap-1.5 mt-3">
+                                    {monthlyData.pieData.slice(0, 4).map((item, index) => (
+                                        <div
+                                            key={item.name}
+                                            className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-700/50 text-xs"
                                         >
-                                            {monthlyData.pieData.map((_, index) => (
-                                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                            ))}
-                                        </Pie>
-                                        <Tooltip content={<CustomTooltip />} />
-                                        <Legend
-                                            formatter={(value) => <span className="text-sm text-gray-600 dark:text-gray-400">{value}</span>}
-                                            layout="horizontal"
-                                            align="center"
-                                            verticalAlign="bottom"
-                                        />
-                                    </PieChart>
-                                </ResponsiveContainer>
-                            </div>
+                                            <span
+                                                className="w-2 h-2 rounded-full flex-shrink-0"
+                                                style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                                            />
+                                            <span className="text-gray-600 dark:text-gray-400 truncate max-w-[60px]">
+                                                {item.name.split(' ')[0]}
+                                            </span>
+                                        </div>
+                                    ))}
+                                    {monthlyData.pieData.length > 4 && (
+                                        <span className="text-xs text-gray-400">+{monthlyData.pieData.length - 4}</span>
+                                    )}
+                                </div>
+                            </>
                         ) : (
-                            <div className="flex flex-col items-center justify-center py-8 text-center">
-                                <div className="w-14 h-14 rounded-2xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-3">
-                                    <ChartIcon className="w-7 h-7 text-gray-400" />
+                            <div className="flex flex-col items-center justify-center py-6 text-center">
+                                <div className="w-12 h-12 rounded-2xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-2">
+                                    <ChartIcon className="w-6 h-6 text-gray-400" />
                                 </div>
                                 <h4 className="font-semibold text-gray-900 dark:text-white text-sm mb-1">Belum Ada Data</h4>
-                                <p className="text-xs text-gray-500 dark:text-gray-400 max-w-[200px]">
-                                    Catat pengeluaran untuk melihat ringkasan kategori
+                                <p className="text-xs text-gray-500 dark:text-gray-400 max-w-[180px]">
+                                    Catat pengeluaran untuk melihat ringkasan
                                 </p>
                             </div>
                         )}
@@ -283,16 +350,16 @@ const Dashboard: React.FC = () => {
                     />
 
                     {/* Upcoming Bills */}
-                    <div className="p-5 rounded-2xl bg-white dark:bg-gray-800/80 backdrop-blur-sm shadow-sm border border-gray-100 dark:border-gray-700/50">
-                        <div className="flex justify-between items-center mb-4">
-                            <h3 className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                                <CalendarIcon className="w-5 h-5 text-primary" />
-                                Tagihan Mendatang
+                    <div className="p-4 rounded-2xl bg-white dark:bg-gray-800/80 backdrop-blur-sm shadow-sm border border-gray-100 dark:border-gray-700/50 overflow-hidden">
+                        <div className="flex justify-between items-center mb-3 gap-2">
+                            <h3 className="font-bold text-gray-900 dark:text-white flex items-center gap-2 text-sm">
+                                <CalendarIcon className="w-4 h-4 text-primary flex-shrink-0" />
+                                <span className="truncate">Tagihan Mendatang</span>
                             </h3>
-                            <Link to="/planning" className="text-sm text-primary hover:text-primary-dark font-medium transition-colors">Kelola</Link>
+                            <Link to="/planning" className="text-xs text-primary hover:text-primary-dark font-medium transition-colors whitespace-nowrap flex-shrink-0">Kelola</Link>
                         </div>
                         {upcomingBills.length > 0 ? (
-                            <ul className="space-y-3">
+                            <ul className="space-y-2">
                                 {upcomingBills.map(bill => {
                                     const dueDate = new Date(bill.nextDueDate);
                                     const today = new Date();
@@ -300,25 +367,25 @@ const Dashboard: React.FC = () => {
                                     const isUrgent = daysLeft <= 3;
 
                                     return (
-                                        <li key={bill.id} className="group flex justify-between items-center py-3 px-3 -mx-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                                            <div className="flex items-center gap-3">
-                                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isUrgent ? 'bg-red-100 dark:bg-red-900/30' : 'bg-blue-100 dark:bg-blue-900/30'}`}>
-                                                    <CalendarIcon className={`w-5 h-5 ${isUrgent ? 'text-red-600 dark:text-red-400' : 'text-blue-600 dark:text-blue-400'}`} />
+                                        <li key={bill.id} className="group flex justify-between items-center gap-2 py-2.5 px-2 -mx-2 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                            <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                                                <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${isUrgent ? 'bg-red-100 dark:bg-red-900/30' : 'bg-blue-100 dark:bg-blue-900/30'}`}>
+                                                    <CalendarIcon className={`w-4 h-4 ${isUrgent ? 'text-red-600 dark:text-red-400' : 'text-blue-600 dark:text-blue-400'}`} />
                                                 </div>
-                                                <div>
-                                                    <p className="font-medium text-gray-900 dark:text-white text-sm">{bill.name}</p>
-                                                    <p className={`text-xs ${isUrgent ? 'text-red-500 font-medium' : 'text-gray-500 dark:text-gray-400'}`}>
+                                                <div className="min-w-0 flex-1">
+                                                    <p className="font-medium text-gray-900 dark:text-white text-sm truncate">{bill.name}</p>
+                                                    <p className={`text-xs truncate ${isUrgent ? 'text-red-500 font-medium' : 'text-gray-500 dark:text-gray-400'}`}>
                                                         {isUrgent ? `⚠️ ${daysLeft} hari lagi` : dueDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
                                                     </p>
                                                 </div>
                                             </div>
-                                            <span className="font-bold text-gray-900 dark:text-white text-sm">{formatCurrency(bill.amount)}</span>
+                                            <span className="font-bold text-gray-900 dark:text-white text-sm flex-shrink-0">{formatCurrency(bill.amount)}</span>
                                         </li>
                                     );
                                 })}
                             </ul>
                         ) : (
-                            <div className="flex flex-col items-center justify-center py-8 text-center">
+                            <div className="flex flex-col items-center justify-center py-6 text-center">
                                 <BillsEmptyState onAddBill={() => navigate('/planning')} />
                             </div>
                         )}
@@ -330,23 +397,93 @@ const Dashboard: React.FC = () => {
                     onTryClick={() => navigate('/ai-chat')}
                 />
 
-                {/* Floating Action Buttons - Mobile Only */}
-                <div className="fixed bottom-24 right-4 md:hidden flex flex-col gap-3 z-50">
-                    <Link
-                        to="/ai-chat"
-                        className="flex items-center justify-center w-12 h-12 rounded-2xl bg-indigo-600 text-white shadow-lg shadow-indigo-600/40 hover:bg-indigo-500 hover:scale-105 transition-all active:scale-95 border border-white/20"
-                        title="Asisten AI"
-                    >
-                        <SparklesIcon className="w-6 h-6" />
-                    </Link>
-                    <Link
-                        to="/transactions"
-                        className="flex items-center justify-center w-12 h-12 rounded-2xl bg-emerald-500 text-white shadow-lg shadow-emerald-500/40 hover:bg-emerald-400 hover:scale-105 transition-all active:scale-95 border border-white/20"
-                        title="Tambah Transaksi"
-                    >
-                        <PlusIcon className="w-6 h-6" />
-                    </Link>
+                {/* Premium Floating Action Buttons - Mobile Only */}
+                <div className="fixed bottom-28 right-4 md:hidden flex flex-col gap-4 z-50">
+                    {/* Scan Receipt FAB */}
+                    <div className="relative group">
+                        <div className="absolute inset-0 rounded-2xl bg-purple-500/40 blur-lg opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <button
+                            onClick={() => setIsScannerOpen(true)}
+                            className="relative flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-violet-600 text-white shadow-xl shadow-purple-600/50 hover:scale-110 transition-all duration-300 active:scale-95 border border-white/20"
+                            title="Scan Struk"
+                        >
+                            <CameraIcon className="w-6 h-6 drop-shadow-sm" />
+                        </button>
+                    </div>
+                    {/* AI Assistant FAB */}
+                    <div className="relative group">
+                        <div className="absolute inset-0 rounded-2xl bg-indigo-500/40 blur-lg opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <Link
+                            to="/ai-chat"
+                            className="relative flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-blue-600 text-white shadow-xl shadow-indigo-600/50 hover:scale-110 transition-all duration-300 active:scale-95 border border-white/20"
+                            title="Asisten AI"
+                        >
+                            <SparklesIcon className="w-6 h-6 drop-shadow-sm" />
+                        </Link>
+                    </div>
+                    {/* Add Transaction FAB - Primary */}
+                    <div className="relative group">
+                        <div className="absolute inset-0 rounded-2xl bg-primary/40 blur-lg group-hover:blur-xl transition-all" />
+                        <Link
+                            to="/transactions"
+                            className="relative flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-teal-400 text-white shadow-xl shadow-primary/50 hover:scale-110 transition-all duration-300 active:scale-95 border border-white/20"
+                            title="Tambah Transaksi"
+                        >
+                            <PlusIcon className="w-7 h-7 drop-shadow-sm" />
+                        </Link>
+                    </div>
                 </div>
+
+                {/* Receipt Scanner Modal */}
+                {isScannerOpen && (
+                    <ReceiptScanner
+                        onScanComplete={handleScanResult}
+                        onClose={() => setIsScannerOpen(false)}
+                    />
+                )}
+
+                {/* Confirmation Modal */}
+                <Modal
+                    isOpen={isConfirmModalOpen}
+                    onClose={() => setIsConfirmModalOpen(false)}
+                    title="Simpan Transaksi Struk"
+                >
+                    <div className="space-y-4">
+                        <div>
+                            <CurrencyInput
+                                label="Jumlah"
+                                value={scannedAmount}
+                                onChange={setScannedAmount}
+                                className="w-full"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Keterangan
+                            </label>
+                            <input
+                                type="text"
+                                value={scannedDescription}
+                                onChange={(e) => setScannedDescription(e.target.value)}
+                                className="w-full px-4 py-2 rounded-xl bg-gray-50 dark:bg-gray-800 border-none focus:ring-2 focus:ring-primary dark:text-white"
+                            />
+                        </div>
+                        <div className="flex justify-end gap-3 mt-6">
+                            <button
+                                onClick={() => setIsConfirmModalOpen(false)}
+                                className="px-4 py-2 rounded-xl text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                onClick={handleSaveScannedTransaction}
+                                className="px-4 py-2 rounded-xl bg-primary text-white hover:bg-primary-dark shadow-lg shadow-primary/30 transition-colors"
+                            >
+                                Simpan
+                            </button>
+                        </div>
+                    </div>
+                </Modal>
             </div>
         </ErrorBoundary>
     );

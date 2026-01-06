@@ -4,6 +4,8 @@ import { useToast } from './ToastContext';
 import api from '../services/api';
 import { Transaction, Budget, Goal, Bill, AppNotification, Category } from '../services/types';
 import { generateNotifications } from '../services/notificationService';
+import { networkService } from '../services/networkService';
+import { processScheduledNotifications } from '../services/notificationSchedulerService';
 
 interface DataContextType {
     transactions: Transaction[];
@@ -62,17 +64,34 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
         setLoading(true);
         try {
-            const [fetchedTransactions, fetchedBudgets, fetchedGoals, fetchedBills] = await Promise.all([
-                api.getTransactions(user.id),
-                api.getBudgets(user.id),
-                api.getGoals(user.id),
-                api.getBills(user.id),
-            ]);
-            setTransactions(fetchedTransactions);
-            setBudgets(fetchedBudgets);
-            setGoals(fetchedGoals);
-            setBills(fetchedBills);
-            setBills(fetchedBills);
+            // Use networkService.withRetry for automatic retry with exponential backoff
+            const fetchAllData = async () => {
+                const [fetchedTransactions, fetchedBudgets, fetchedGoals, fetchedBills] = await Promise.all([
+                    api.getTransactions(user.id),
+                    api.getBudgets(user.id),
+                    api.getGoals(user.id),
+                    api.getBills(user.id),
+                ]);
+                return { fetchedTransactions, fetchedBudgets, fetchedGoals, fetchedBills };
+            };
+
+            const result = await networkService.withRetry(fetchAllData, {
+                maxRetries: 3,
+                baseDelay: 1000,
+                onRetry: (attempt, error) => {
+                    console.log(`Retrying data fetch (attempt ${attempt}):`, error.message);
+                    showToast({
+                        type: 'info',
+                        title: 'Mencoba ulang...',
+                        message: `Percobaan ${attempt} dari 3`
+                    });
+                }
+            });
+
+            setTransactions(result.fetchedTransactions);
+            setBudgets(result.fetchedBudgets);
+            setGoals(result.fetchedGoals);
+            setBills(result.fetchedBills);
         } catch (error) {
             console.error("Error fetching data:", error);
             const errorMessage = error instanceof Error ? error.message : 'Terjadi kesalahan saat mengambil data.';
@@ -99,6 +118,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }));
 
         setNotifications(updatedNotifications);
+
+        // Process push notifications (respects user preferences)
+        processScheduledNotifications(bills, budgets, goals, transactions);
     }, [user, loading, bills, budgets, goals, transactions]);
 
     const markAsRead = (notificationId: string) => {

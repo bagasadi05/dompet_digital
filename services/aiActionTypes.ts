@@ -1,4 +1,4 @@
-import { Transaction, Budget, Goal, Category, TransactionType } from './types';
+import { Category, TransactionType } from './types';
 
 // AI Action Types
 export type AIActionType =
@@ -11,7 +11,11 @@ export type AIActionType =
     | 'update_budget'
     | 'delete_budget'
     | 'add_goal'
-    | 'delete_goal';
+    | 'delete_goal'
+    | 'add_bill'
+    | 'update_bill'
+    | 'delete_bill'
+    | 'pay_bill';
 
 // Parameter interfaces for each action
 export interface AnalyzeSpendingParams {
@@ -78,6 +82,32 @@ export interface DeleteGoalParams {
     name?: string; // For display
 }
 
+export interface AddBillParams {
+    name: string;
+    amount: number;
+    nextDueDate: string;
+    frequency: 'once' | 'weekly' | 'monthly' | 'yearly';
+}
+
+export interface UpdateBillParams {
+    billId: string;
+    name?: string;
+    amount?: number;
+    nextDueDate?: string;
+    frequency?: 'once' | 'weekly' | 'monthly' | 'yearly';
+}
+
+export interface DeleteBillParams {
+    billId: string;
+    name?: string;
+}
+
+export interface PayBillParams {
+    billId: string;
+    name?: string;
+    amount?: number;
+}
+
 // Union type for all action parameters
 export type AIActionParams =
     | { type: 'get_transactions'; params: GetTransactionsParams }
@@ -89,7 +119,11 @@ export type AIActionParams =
     | { type: 'update_budget'; params: UpdateBudgetParams }
     | { type: 'delete_budget'; params: DeleteBudgetParams }
     | { type: 'add_goal'; params: AddGoalParams }
-    | { type: 'delete_goal'; params: DeleteGoalParams };
+    | { type: 'delete_goal'; params: DeleteGoalParams }
+    | { type: 'add_bill'; params: AddBillParams }
+    | { type: 'update_bill'; params: UpdateBillParams }
+    | { type: 'delete_bill'; params: DeleteBillParams }
+    | { type: 'pay_bill'; params: PayBillParams };
 
 // AI Action interface with metadata
 export interface AIAction {
@@ -102,7 +136,7 @@ export interface AIAction {
 export interface ActionPreview {
     title: string;
     details: { label: string; value: string }[];
-    icon: 'transaction' | 'budget' | 'goal' | 'chart';
+    icon: 'transaction' | 'budget' | 'goal' | 'chart' | 'bill';
     variant: 'add' | 'delete' | 'update' | 'info';
 }
 
@@ -115,9 +149,10 @@ export function generateConfirmationMessage(action: AIActionParams): string {
         case 'analyze_spending':
             return 'Menganalisis data pengeluaran...';
 
-        case 'add_transaction':
+        case 'add_transaction': {
             const txType = action.params.type === 'pemasukan' ? 'pemasukan' : 'pengeluaran';
             return `Tambahkan ${txType} "${action.params.description}" sebesar ${formatCurrency(action.params.amount)}?`;
+        }
 
         case 'update_transaction':
             return `Update transaksi "${action.params.description || 'ini'}"?`;
@@ -139,6 +174,18 @@ export function generateConfirmationMessage(action: AIActionParams): string {
 
         case 'delete_goal':
             return `Hapus goal "${action.params.name || 'ini'}"?`;
+
+        case 'add_bill':
+            return `Buat tagihan "${action.params.name}" sebesar ${formatCurrency(action.params.amount)} (${action.params.frequency})?`;
+
+        case 'update_bill':
+            return `Update tagihan "${action.params.name || 'ini'}"?`;
+
+        case 'delete_bill':
+            return `Hapus tagihan "${action.params.name || 'ini'}"?`;
+
+        case 'pay_bill':
+            return `Bayar tagihan "${action.params.name || 'ini'}" sebesar ${action.params.amount ? formatCurrency(action.params.amount) : 'sesuai tagihan'}?`;
 
         default:
             return 'Konfirmasi aksi ini?';
@@ -177,7 +224,7 @@ export function generatePreview(action: AIActionParams): ActionPreview {
                 ]
             };
 
-        case 'update_transaction':
+        case 'update_transaction': {
             const updates = [];
             if (action.params.amount) updates.push({ label: 'Jumlah Baru', value: formatCurrency(action.params.amount) });
             if (action.params.description) updates.push({ label: 'Deskripsi', value: action.params.description });
@@ -189,6 +236,7 @@ export function generatePreview(action: AIActionParams): ActionPreview {
                 variant: 'update',
                 details: updates.length > 0 ? updates : [{ label: 'Info', value: 'Update detail transaksi' }]
             };
+        }
 
         case 'delete_transaction':
             return {
@@ -251,6 +299,50 @@ export function generatePreview(action: AIActionParams): ActionPreview {
                 variant: 'delete',
                 details: [
                     { label: 'Goal', value: action.params.name || action.params.goalId }
+                ]
+            };
+
+        case 'add_bill':
+            return {
+                title: 'Buat Tagihan',
+                icon: 'bill',
+                variant: 'add',
+                details: [
+                    { label: 'Nama', value: action.params.name },
+                    { label: 'Jumlah', value: formatCurrency(action.params.amount) },
+                    { label: 'Jatuh Tempo', value: action.params.nextDueDate },
+                    { label: 'Frekuensi', value: action.params.frequency }
+                ]
+            };
+
+        case 'update_bill':
+            return {
+                title: 'Update Tagihan',
+                icon: 'bill',
+                variant: 'update',
+                details: [
+                    { label: 'Tagihan', value: action.params.name || action.params.billId }
+                ]
+            };
+
+        case 'delete_bill':
+            return {
+                title: 'Hapus Tagihan',
+                icon: 'bill',
+                variant: 'delete',
+                details: [
+                    { label: 'Tagihan', value: action.params.name || action.params.billId }
+                ]
+            };
+
+        case 'pay_bill':
+            return {
+                title: 'Bayar Tagihan',
+                icon: 'bill',
+                variant: 'update',
+                details: [
+                    { label: 'Tagihan', value: action.params.name || action.params.billId },
+                    { label: 'Aksi', value: 'Bayar & Catat Pengeluaran' }
                 ]
             };
 

@@ -1,15 +1,7 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { createVoiceInput, isVoiceInputSupported, VoiceInputController } from '../services/voiceInputService';
+import React, { useState } from 'react';
 import { parseVoiceInput, ParsedTransaction } from '../services/voiceParserService';
 
 import { XMarkIcon, CheckIcon, PaperAirplaneIcon } from './common/Icons';
-
-// Microphone Icon
-const MicrophoneIcon: React.FC<{ className?: string }> = ({ className }) => (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 0 0 6-6v-1.5m-6 7.5a6 6 0 0 1-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 0 1-3-3V4.5a3 3 0 1 1 6 0v8.25a3 3 0 0 1-3 3Z" />
-    </svg>
-);
 
 // Keyboard Icon
 const KeyboardIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -18,126 +10,55 @@ const KeyboardIcon: React.FC<{ className?: string }> = ({ className }) => (
     </svg>
 );
 
-interface VoiceInputModalProps {
+interface TextInputModalProps {
     isOpen: boolean;
     onClose: () => void;
     onResult: (result: ParsedTransaction) => void;
 }
 
-type VoiceState = 'idle' | 'listening' | 'processing' | 'success' | 'error';
-type InputMode = 'voice' | 'text';
+type InputState = 'idle' | 'processing' | 'success' | 'error';
 
-const VoiceInputModal: React.FC<VoiceInputModalProps> = ({ isOpen, onClose, onResult }) => {
-    const [voiceState, setVoiceState] = useState<VoiceState>('idle');
-    const [inputMode, setInputMode] = useState<InputMode>('voice');
+const VoiceInputModal: React.FC<TextInputModalProps> = ({ isOpen, onClose, onResult }) => {
+    const [inputState, setInputState] = useState<InputState>('idle');
     const [textInput, setTextInput] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const [parsedResult, setParsedResult] = useState<ParsedTransaction | null>(null);
-    const [transcriptText, setTranscriptText] = useState(''); // Rename to avoid unused warning if strictly checked, but actually used in render. Wait, "transcript" IS used in render line 153.
-    const voiceControllerRef = useRef<VoiceInputController | null>(null);
-
-    const isSupported = isVoiceInputSupported();
-
-    const handleVoiceResult = useCallback(async (text: string, isFinal: boolean) => {
-        setTranscriptText(text); // Use state
-
-        if (isFinal && text.trim()) {
-            setVoiceState('processing');
-            const result = await parseVoiceInput(text);
-            setParsedResult(result);
-
-            if (result.success) {
-                setVoiceState('success');
-            } else {
-                setErrorMessage(result.error || 'Gagal memproses ucapan');
-                setVoiceState('error');
-            }
-        }
-    }, []);
 
     const handleTextSubmit = async () => {
         if (!textInput.trim()) return;
-        setVoiceState('processing');
-        // Use parseVoiceInput for text too as it parses natural language
+        setInputState('processing');
         const result = await parseVoiceInput(textInput);
         setParsedResult(result);
 
         if (result.success) {
-            setVoiceState('success');
+            setInputState('success');
         } else {
             setErrorMessage(result.error || 'Gagal memproses teks');
-            setVoiceState('error');
+            setInputState('error');
         }
     };
-
-    const startListening = useCallback(() => {
-        setTranscriptText('');
-        setErrorMessage('');
-        setParsedResult(null);
-        setVoiceState('listening');
-
-        const controller = createVoiceInput({
-            onStart: () => setVoiceState('listening'),
-            onResult: handleVoiceResult,
-            onError: (error) => {
-                setErrorMessage(error);
-                setVoiceState('error');
-            },
-            onEnd: () => {
-                if (voiceState === 'listening') {
-                    // If no final result yet, stay in current state
-                }
-            }
-        });
-
-        voiceControllerRef.current = controller;
-        controller.start();
-    }, [handleVoiceResult, voiceState]);
-
-    const stopListening = useCallback(() => {
-        voiceControllerRef.current?.stop();
-    }, []);
 
     const handleConfirm = () => {
         if (parsedResult?.success) {
             onResult(parsedResult);
+            handleReset();
             onClose();
         }
     };
 
-    const handleRetry = () => {
-        setVoiceState('idle');
-        setTranscriptText('');
+    const handleReset = () => {
+        setInputState('idle');
         setTextInput('');
         setErrorMessage('');
         setParsedResult(null);
-        // If mode was text, stay in text, if voice stay in voice
     };
 
-    const switchToTextMode = () => {
-        setInputMode('text');
-        handleRetry();
-    };
-
-    const switchToVoiceMode = () => {
-        setInputMode('voice');
-        handleRetry();
-    };
-
-    // Cleanup on unmount
-    useEffect(() => {
-        return () => {
-            voiceControllerRef.current?.stop();
-        };
-    }, []);
-
-    // Reset when modal closes
-    useEffect(() => {
-        if (!isOpen) {
-            handleRetry();
-            setInputMode('voice'); // Reset to voice mode default
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' && !e.shiftKey && textInput.trim() && inputState === 'idle') {
+            e.preventDefault();
+            handleTextSubmit();
         }
-    }, [isOpen]);
+    };
 
     if (!isOpen) return null;
 
@@ -147,123 +68,59 @@ const VoiceInputModal: React.FC<VoiceInputModalProps> = ({ isOpen, onClose, onRe
                 {/* Header */}
                 <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-gray-700">
                     <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                        {inputMode === 'voice' ? (
-                            <MicrophoneIcon className="w-5 h-5 text-primary" />
-                        ) : (
-                            <KeyboardIcon className="w-5 h-5 text-primary" />
-                        )}
-                        {inputMode === 'voice' ? 'Input Suara' : 'Input Teks'}
+                        <KeyboardIcon className="w-5 h-5 text-primary" />
+                        Input Transaksi AI
                     </h2>
-                    <div className="flex items-center gap-2">
-                        <button
-                            onClick={inputMode === 'voice' ? switchToTextMode : switchToVoiceMode}
-                            className="p-2 text-sm font-medium text-primary hover:bg-primary/10 rounded-lg transition-colors"
-                        >
-                            {inputMode === 'voice' ? 'Ketik Manual' : 'Input Suara'}
-                        </button>
-                        <button
-                            onClick={onClose}
-                            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
-                        >
-                            <XMarkIcon className="w-5 h-5 text-gray-500" />
-                        </button>
-                    </div>
+                    <button
+                        onClick={() => { handleReset(); onClose(); }}
+                        className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
+                    >
+                        <XMarkIcon className="w-5 h-5 text-gray-500" />
+                    </button>
                 </div>
 
                 {/* Content */}
                 <div className="p-6">
-                    {inputMode === 'voice' && !isSupported ? (
-                        <div className="text-center py-8">
-                            <MicrophoneIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                            <p className="text-gray-500">Browser Anda tidak mendukung input suara.</p>
+                    {/* Idle State - Text Input */}
+                    {inputState === 'idle' && (
+                        <div className="space-y-4">
+                            <div>
+                                <p className="text-sm text-gray-500 mb-2">
+                                    Ketik transaksi Anda dalam bahasa natural:
+                                </p>
+                                <textarea
+                                    value={textInput}
+                                    onChange={(e) => setTextInput(e.target.value)}
+                                    onKeyDown={handleKeyDown}
+                                    placeholder="Contoh: Beli bensin 25 ribu, makan siang 35000, gaji bulan ini 5 juta"
+                                    className="w-full h-28 p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 focus:ring-2 focus:ring-primary focus:border-transparent resize-none dark:text-white text-sm"
+                                    autoFocus
+                                />
+                            </div>
                             <button
-                                onClick={switchToTextMode}
-                                className="mt-4 px-4 py-2 bg-primary/10 text-primary rounded-xl font-medium"
+                                onClick={handleTextSubmit}
+                                disabled={!textInput.trim()}
+                                className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-primary disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-medium hover:bg-primary-dark transition-colors"
                             >
-                                Gunakan Mode Teks
+                                <PaperAirplaneIcon className="w-5 h-5" />
+                                Proses dengan AI
                             </button>
                         </div>
-                    ) : inputMode === 'voice' ? (
-                        <>
-                            {/* Generic States for Voice */}
-                            {voiceState === 'idle' && (
-                                <div className="text-center py-8">
-                                    <button
-                                        onClick={startListening}
-                                        className="w-24 h-24 rounded-full text-white flex items-center justify-center mx-auto shadow-lg hover:shadow-xl hover:scale-105 transition-all active:scale-95"
-                                        style={{ background: 'linear-gradient(to right, #8b5cf6, #a855f7)' }}
-                                    >
-                                        <MicrophoneIcon className="w-10 h-10 text-white" />
-                                    </button>
-                                    <p className="text-sm text-gray-500 mt-4">Klik untuk mulai berbicara</p>
-                                    <p className="text-xs text-gray-400 mt-1">Contoh: "Beli makan siang tiga puluh ribu"</p>
-                                </div>
-                            )}
-
-                            {voiceState === 'listening' && (
-                                <div className="text-center py-8">
-                                    <div className="relative w-24 h-24 mx-auto mb-4">
-                                        <div className="absolute inset-0 rounded-full bg-purple-500/20 animate-ping" />
-                                        <div className="absolute inset-2 rounded-full bg-purple-500/30 animate-pulse" />
-                                        <button
-                                            onClick={stopListening}
-                                            className="relative w-full h-full rounded-full text-white flex items-center justify-center shadow-lg transition-all"
-                                            style={{ background: 'linear-gradient(to right, #8b5cf6, #a855f7)' }}
-                                        >
-                                            <MicrophoneIcon className="w-10 h-10 text-white" />
-                                        </button>
-                                    </div>
-                                    <p className="text-purple-600 dark:text-purple-400 font-medium">Mendengarkan...</p>
-                                    {transcriptText && (
-                                        <p className="mt-4 p-3 bg-gray-100 dark:bg-gray-700 rounded-xl text-gray-700 dark:text-gray-300 text-sm">
-                                            "{transcriptText}"
-                                        </p>
-                                    )}
-                                </div>
-                            )}
-                        </>
-                    ) : (
-                        // Text Input Mode
-                        <>
-                            {voiceState === 'idle' && (
-                                <div className="space-y-4">
-                                    <textarea
-                                        value={textInput}
-                                        onChange={(e) => setTextInput(e.target.value)}
-                                        placeholder="Contoh: Beli bensin 25.000 kategori transportasi"
-                                        className="w-full h-32 p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 focus:ring-2 focus:ring-primary focus:border-transparent resize-none dark:text-white"
-                                        autoFocus
-                                    />
-                                    <button
-                                        onClick={handleTextSubmit}
-                                        disabled={!textInput.trim()}
-                                        className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-primary disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-medium hover:bg-primary-dark transition-colors"
-                                    >
-                                        <PaperAirplaneIcon className="w-5 h-5" />
-                                        Proses
-                                    </button>
-                                </div>
-                            )}
-                        </>
                     )}
 
-                    {/* Shared states (Processing, Success, Error) */}
-
                     {/* Processing State */}
-                    {voiceState === 'processing' && (
+                    {inputState === 'processing' && (
                         <div className="text-center py-8">
                             <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-                            <p className="text-gray-600 dark:text-gray-400">Memproses...</p>
-                            {transcriptText && (
-                                <p className="mt-4 p-3 bg-gray-100 dark:bg-gray-700 rounded-xl text-gray-700 dark:text-gray-300 text-sm">
-                                    "{transcriptText}"
-                                </p>
-                            )}
+                            <p className="text-gray-600 dark:text-gray-400">AI sedang memproses...</p>
+                            <p className="mt-2 p-3 bg-gray-100 dark:bg-gray-700 rounded-xl text-gray-700 dark:text-gray-300 text-sm">
+                                "{textInput}"
+                            </p>
                         </div>
                     )}
 
                     {/* Success State */}
-                    {voiceState === 'success' && parsedResult && (
+                    {inputState === 'success' && parsedResult && (
                         <div className="space-y-4">
                             <div className="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-xl">
                                 <CheckIcon className="w-6 h-6 text-green-500" />
@@ -297,7 +154,7 @@ const VoiceInputModal: React.FC<VoiceInputModalProps> = ({ isOpen, onClose, onRe
 
                             <div className="flex gap-3">
                                 <button
-                                    onClick={handleRetry}
+                                    onClick={handleReset}
                                     className="flex-1 py-3 px-4 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                                 >
                                     Ulang
@@ -314,28 +171,18 @@ const VoiceInputModal: React.FC<VoiceInputModalProps> = ({ isOpen, onClose, onRe
                     )}
 
                     {/* Error State */}
-                    {voiceState === 'error' && (
+                    {inputState === 'error' && (
                         <div className="space-y-4">
                             <div className="flex items-center gap-3 p-3 bg-red-50 dark:bg-red-900/20 rounded-xl">
                                 <XMarkIcon className="w-6 h-6 text-red-500" />
                                 <span className="text-red-700 dark:text-red-400 text-sm">{errorMessage}</span>
                             </div>
-                            <div className="flex gap-2">
-                                <button
-                                    onClick={handleRetry}
-                                    className="flex-1 py-3 px-4 bg-primary text-white rounded-xl font-medium hover:bg-primary-dark transition-colors"
-                                >
-                                    Coba Lagi
-                                </button>
-                                {inputMode === 'voice' && (
-                                    <button
-                                        onClick={switchToTextMode}
-                                        className="flex-1 py-3 px-4 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                                    >
-                                        Ketik Manual
-                                    </button>
-                                )}
-                            </div>
+                            <button
+                                onClick={handleReset}
+                                className="w-full py-3 px-4 bg-primary text-white rounded-xl font-medium hover:bg-primary-dark transition-colors"
+                            >
+                                Coba Lagi
+                            </button>
                         </div>
                     )}
                 </div>
@@ -344,5 +191,5 @@ const VoiceInputModal: React.FC<VoiceInputModalProps> = ({ isOpen, onClose, onRe
     );
 };
 
-
 export default VoiceInputModal;
+
