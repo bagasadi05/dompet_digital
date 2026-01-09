@@ -9,6 +9,7 @@ interface CurrencyInputProps {
     autoFocus?: boolean;
     className?: string;
     error?: string | null;
+    max?: number;
 }
 
 // Format number with thousand separators (using dots for Indonesian locale)
@@ -26,6 +27,7 @@ const CurrencyInput: React.FC<CurrencyInputProps> = ({
     autoFocus = false,
     className = '',
     error,
+    max,
 }) => {
     const [displayValue, setDisplayValue] = useState(formatWithSeparator(value));
     const hasError = !!error;
@@ -47,7 +49,12 @@ const CurrencyInput: React.FC<CurrencyInputProps> = ({
             return;
         }
 
-        const numericValue = parseInt(cleanedInput, 10);
+        let numericValue = parseInt(cleanedInput, 10);
+
+        if (max !== undefined && numericValue > max) {
+            numericValue = max;
+        }
+
         const formatted = formatWithSeparator(numericValue);
 
         setDisplayValue(formatted);

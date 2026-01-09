@@ -55,7 +55,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 
 
       {/* Modal Panel */}
       <div
-        className={`relative bg-white dark:bg-gray-800 rounded-t-3xl sm:rounded-2xl shadow-2xl ${sizeClasses[size]} w-full max-h-[90vh] flex flex-col animate-slideUp`}
+        className={`relative bg-white/90 dark:bg-[#0A0F1A]/90 backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-3xl sm:rounded-[2rem] shadow-2xl ${sizeClasses[size]} w-full max-h-[90vh] flex flex-col animate-slideUp overflow-hidden ring-1 ring-black/5 dark:ring-white/5`}
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}

@@ -103,7 +103,7 @@ const AuthPage: React.FC = () => {
                     <form onSubmit={handleSubmit} className="space-y-6">
                         {/* Email Field */}
                         <div className="space-y-2">
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300" htmlFor="email">
+                            <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 ml-1" htmlFor="email">
                                 Alamat Email
                             </label>
                             <input
@@ -113,13 +113,13 @@ const AuthPage: React.FC = () => {
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 placeholder="nama@contoh.com"
-                                className="w-full h-12 lg:h-14 px-4 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+                                className="w-full h-12 lg:h-14 px-5 rounded-2xl bg-gray-50/50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-white/10 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all backdrop-blur-sm shadow-sm"
                             />
                         </div>
 
                         {/* Password Field */}
                         <div className="space-y-2">
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300" htmlFor="password">
+                            <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 ml-1" htmlFor="password">
                                 Kata Sandi
                             </label>
                             <div className="relative flex items-center">
@@ -131,12 +131,12 @@ const AuthPage: React.FC = () => {
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     placeholder="Masukkan kata sandi"
-                                    className="w-full h-12 lg:h-14 px-4 pr-12 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+                                    className="w-full h-12 lg:h-14 px-5 pr-12 rounded-2xl bg-gray-50/50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-white/10 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all backdrop-blur-sm shadow-sm"
                                 />
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-4 text-gray-500 hover:text-primary transition-colors"
+                                    className="absolute right-5 text-gray-400 hover:text-primary transition-colors"
                                 >
                                     {showPassword ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
                                 </button>
@@ -165,12 +165,12 @@ const AuthPage: React.FC = () => {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full h-12 lg:h-14 bg-primary hover:bg-primary-dark text-white font-bold rounded-lg transition-all transform active:scale-[0.98] shadow-lg shadow-primary/30 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-full h-14 bg-gradient-to-r from-primary to-emerald-600 hover:from-primary-dark hover:to-emerald-700 text-white font-bold text-lg rounded-2xl transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-primary/30 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                         >
                             {loading ? (
-                                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                <div className="w-6 h-6 border-3 border-white/30 border-t-white rounded-full animate-spin" />
                             ) : (
-                                isLoginView ? 'Masuk' : 'Daftar'
+                                isLoginView ? 'Masuk Sekarang' : 'Buat Akun Gratis'
                             )}
                         </button>
                     </form>

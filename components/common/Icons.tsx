@@ -247,6 +247,13 @@ export const PhotoIcon: React.FC<IconProps> = ({ className }) => (
     </svg>
 );
 
+// Clipboard Document List Icon
+export const ClipboardDocumentListIcon: React.FC<IconProps> = ({ className }) => (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.75M9 5.25h3.75m3.75 0h6m-5.166-1.896-.713-.396a5.525 5.525 0 0 0-4.14 0l-.713.396A5.556 5.556 0 0 0 10.5 5.25a5.556 5.556 0 0 0-4.004-1.896l-.713.396A5.553 5.553 0 0 0 3 9.375v11.25c0 1.035.84 1.875 1.875 1.875h14.25c1.035 0 1.875-.84 1.875-1.875V9.375c0-.621-.504-1.125-1.125-1.125H16.5a2.25 2.25 0 0 0-2.25-2.25Z" />
+    </svg>
+);
+
 // Document Magnifying Glass Icon
 export const DocumentMagnifyingGlassIcon: React.FC<IconProps> = ({ className }) => (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -309,5 +316,6 @@ export default {
     CameraIcon,
     PhotoIcon,
     DocumentMagnifyingGlassIcon,
+    ClipboardDocumentListIcon,
     ExclamationCircleIcon,
 };

@@ -8,7 +8,11 @@ import { useToast } from '../contexts/ToastContext';
 
 // Import dashboard components
 import WelcomeCard from './dashboard/WelcomeCard';
+import FinancialScoreWidget from './dashboard/FinancialScoreWidget';
 import FinancialSummary, { formatCurrency } from './dashboard/FinancialSummary';
+
+// ... (other imports)
+
 import QuickActionsGrid from './dashboard/QuickActionsGrid';
 import RecentTransactionsList from './dashboard/RecentTransactionsList';
 import SavingsGoalsTracker from './dashboard/SavingsGoalsTracker';
@@ -212,11 +216,13 @@ const Dashboard: React.FC = () => {
     return (
         <ErrorBoundary>
             <div className="space-y-5 pb-24 md:pb-8">
-                {/* Welcome Card with AI - Requirement 2 */}
                 <WelcomeCard
                     userName={userName}
                     onAIAssistantClick={() => navigate('/ai-chat')}
                 />
+
+                {/* Financial Health Score Widget - [NEW] */}
+                <FinancialScoreWidget transactions={transactions} />
 
                 {/* New User Onboarding Card */}
                 {isNewUser && (

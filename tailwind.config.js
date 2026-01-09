@@ -52,7 +52,8 @@ export default {
         danger: '#EF4444',
       },
       fontFamily: {
-        sans: ['"Inter"', '"Outfit"', 'system-ui', '-apple-system', 'sans-serif'],
+        sans: ['"Plus Jakarta Sans"', '"Outfit"', '"Inter"', 'system-ui', '-apple-system', 'sans-serif'],
+        display: ['"Outfit"', '"Plus Jakarta Sans"', 'sans-serif'], // New display font for headers
       },
       spacing: {
         'safe-bottom': 'env(safe-area-inset-bottom, 0px)',

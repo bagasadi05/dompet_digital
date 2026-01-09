@@ -7,9 +7,9 @@ import { useAuth } from '../contexts/AuthContext';
 import { useData } from '../contexts/DataContext';
 import NotificationBell from './common/NotificationBell';
 import { SettingsIcon } from './common/Icons';
-import VoiceInputModal from './VoiceInputModal';
-import { ParsedTransaction } from '../services/voiceParserService';
-import { TransactionType, Category } from '../services/types';
+// import VoiceInputModal from './VoiceInputModal';
+// import { ParsedTransaction } from '../services/voiceParserService';
+// import { TransactionType, Category } from '../services/types';
 
 // Icons
 const SunIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -122,10 +122,11 @@ const UserMenu: React.FC<{ theme: string; toggleTheme: () => void }> = ({ theme,
 const Layout: React.FC<LayoutProps> = ({ theme, toggleTheme, children }) => {
   const location = useLocation();
   const title = pageTitles[location.pathname] || 'Dompet Digital';
-  const { notifications, markAsRead, markAllAsRead, addTransaction } = useData();
-  const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
+  const { notifications, markAsRead, markAllAsRead } = useData();
+  // const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
+  /*
   const handleVoiceResult = async (result: ParsedTransaction) => {
     if (result.success && result.amount && result.description && result.type) {
       try {
@@ -143,20 +144,32 @@ const Layout: React.FC<LayoutProps> = ({ theme, toggleTheme, children }) => {
       }
     }
   };
+  */
 
   return (
     /* Premium Dark Mode Background - #0A0F1A */
-    <div className="min-h-screen text-gray-900 dark:text-white bg-gray-50 dark:bg-[#0A0F1A]">
+    <div className="min-h-screen text-gray-900 dark:text-white bg-gray-50 dark:bg-[#0A0F1A] relative overflow-hidden">
+      {/* Global Background Mesh */}
+      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px] animate-pulse-slow"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-teal-500/5 rounded-full blur-[120px] animate-pulse-slow delay-1000"></div>
+        <div className="absolute top-[40%] left-[60%] w-[30%] h-[30%] bg-purple-500/5 rounded-full blur-[100px] animate-pulse-slow delay-2000"></div>
+      </div>
+
       {/* Offline Status Indicator */}
-      <OfflineIndicator />
+      <div className="relative z-50">
+        <OfflineIndicator />
+      </div>
 
       {/* Desktop Sidebar */}
-      <Sidebar isCollapsed={!isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
+      <div className="relative z-40">
+        <Sidebar isCollapsed={!isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
+      </div>
 
       {/* Main Content Area */}
-      <div className={`transition-all duration-300 ${isSidebarOpen ? 'md:ml-72' : 'md:ml-20'}`}>
+      <div className={`transition-all duration-300 ${isSidebarOpen ? 'md:ml-72' : 'md:ml-20'} relative z-30`}>
         {/* Premium Glass Header */}
-        <header className="sticky top-0 z-30 bg-white/90 dark:bg-[#0A0F1A]/95 backdrop-blur-2xl border-b border-gray-200/30 dark:border-white/5 transition-all duration-300">
+        <header className="sticky top-0 z-30 bg-white/80 dark:bg-[#0A0F1A]/80 backdrop-blur-xl border-b border-gray-200/30 dark:border-white/5 transition-all duration-300 supports-[backdrop-filter]:bg-white/60">
           <div className="px-4 md:px-6 h-[60px] flex justify-between items-center">
             <div className="flex items-center gap-3">
               {/* Premium Mobile Logo */}
@@ -187,20 +200,18 @@ const Layout: React.FC<LayoutProps> = ({ theme, toggleTheme, children }) => {
         </header>
 
         {/* Main Content */}
-        <main className="p-4 md:p-6 pb-32 md:pb-6 animate-fadeIn overflow-x-hidden">
+        <main className="p-4 md:p-6 pb-32 md:pb-6 animate-fadeIn overflow-x-hidden relative z-10">
           {children}
         </main>
       </div>
 
       {/* Bottom Navigation (Mobile Only) */}
-      <BottomNav onScanClick={() => setIsVoiceModalOpen(true)} />
+      <div className="relative z-50">
+        <BottomNav />
+      </div>
 
       {/* Voice Input Modal */}
-      <VoiceInputModal
-        isOpen={isVoiceModalOpen}
-        onClose={() => setIsVoiceModalOpen(false)}
-        onResult={handleVoiceResult}
-      />
+      {/* Voice Input Modal Removed */}
     </div>
   );
 };

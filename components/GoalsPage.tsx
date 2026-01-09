@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import CountUp from './common/CountUp';
 import { Goal, TransactionType, Category } from '../services/types';
 import Modal from './common/Modal';
 import CurrencyInput from './common/CurrencyInput';
@@ -69,7 +70,7 @@ const GoalForm: React.FC<GoalFormProps> = ({ onSubmit, onClose, initialData }) =
                     value={formData.name}
                     onChange={handleChange}
                     required
-                    className="w-full h-14 px-4 rounded-2xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary text-base font-medium transition-all"
+                    className="w-full h-14 px-4 rounded-2xl bg-gray-50/50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary text-base font-medium transition-all backdrop-blur-sm"
                     placeholder="Contoh: Liburan ke Bali"
                 />
             </div>
@@ -89,7 +90,7 @@ const GoalForm: React.FC<GoalFormProps> = ({ onSubmit, onClose, initialData }) =
                     value={formData.targetDate}
                     onChange={handleChange}
                     required
-                    className="w-full h-14 px-4 rounded-2xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary text-base font-medium transition-all"
+                    className="w-full h-14 px-4 rounded-2xl bg-gray-50/50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary text-base font-medium transition-all backdrop-blur-sm"
                 />
             </div>
 
@@ -220,24 +221,32 @@ const GoalsPage: React.FC = () => {
 
             {/* Stats Cards */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="p-5 rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-white/5 shadow-sm group hover:shadow-md transition-all">
+                <div className="glass-panel p-5 rounded-[1.5rem] group hover:scale-[1.02] transition-all duration-300">
                     <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Total Target</p>
-                    <p className="text-xl md:text-2xl font-extrabold text-gray-900 dark:text-white tracking-tight">{formatCurrency(stats.totalTarget)}</p>
+                    <p className="text-xl md:text-2xl font-extrabold text-gray-900 dark:text-white tracking-tight">
+                        <CountUp end={stats.totalTarget} formattingFn={formatCurrency} />
+                    </p>
                 </div>
-                <div className="p-5 rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-white/5 shadow-sm group hover:shadow-md transition-all">
+                <div className="glass-panel p-5 rounded-[1.5rem] group hover:scale-[1.02] transition-all duration-300">
                     <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Terkumpul</p>
-                    <p className="text-xl md:text-2xl font-extrabold text-emerald-500 dark:text-emerald-400 tracking-tight">{formatCurrency(stats.totalSaved)}</p>
+                    <p className="text-xl md:text-2xl font-extrabold text-emerald-500 dark:text-emerald-400 tracking-tight">
+                        <CountUp end={stats.totalSaved} formattingFn={formatCurrency} />
+                    </p>
                 </div>
-                <div className="p-5 rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-white/5 shadow-sm group hover:shadow-md transition-all">
+                <div className="glass-panel p-5 rounded-[1.5rem] group hover:scale-[1.02] transition-all duration-300">
                     <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Tercapai</p>
                     <div className="flex items-center gap-2">
-                        <p className="text-xl md:text-2xl font-extrabold text-primary tracking-tight">{stats.completedCount} impian</p>
-                        {stats.completedCount > 0 && <span className="text-lg">🎉</span>}
+                        <p className="text-xl md:text-2xl font-extrabold text-primary tracking-tight">
+                            <CountUp end={stats.completedCount} suffix=" impian" />
+                        </p>
+                        {stats.completedCount > 0 && <span className="text-lg animate-bounce">🎉</span>}
                     </div>
                 </div>
-                <div className="p-5 rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-white/5 shadow-sm group hover:shadow-md transition-all">
+                <div className="glass-panel p-5 rounded-[1.5rem] group hover:scale-[1.02] transition-all duration-300">
                     <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Aktif</p>
-                    <p className="text-xl md:text-2xl font-extrabold text-orange-500 dark:text-orange-400 tracking-tight">{stats.activeCount} impian</p>
+                    <p className="text-xl md:text-2xl font-extrabold text-orange-500 dark:text-orange-400 tracking-tight">
+                        <CountUp end={stats.activeCount} suffix=" impian" />
+                    </p>
                 </div>
             </div>
 
@@ -249,7 +258,7 @@ const GoalsPage: React.FC = () => {
                     placeholder="Cari impian..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full h-14 pl-12 pr-4 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary/50 focus:border-primary text-base font-medium transition-all shadow-sm"
+                    className="w-full h-14 pl-12 pr-4 rounded-2xl bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border border-gray-200/50 dark:border-white/10 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary/50 focus:border-primary text-base font-medium transition-all shadow-sm hover:bg-white dark:hover:bg-gray-800"
                 />
             </div>
 
@@ -265,9 +274,9 @@ const GoalsPage: React.FC = () => {
                         return (
                             <div
                                 key={goal.id}
-                                className={`relative p-6 rounded-[24px] border shadow-sm transition-all duration-300 hover:shadow-lg group overflow-hidden ${isCompleted
-                                    ? 'bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 border-emerald-200 dark:border-emerald-800'
-                                    : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-white/5 hover:border-emerald-100 dark:hover:border-emerald-900/30'
+                                className={`glass-panel relative p-6 rounded-[24px] border shadow-sm transition-all duration-300 hover:scale-[1.01] group overflow-hidden ${isCompleted
+                                    ? 'bg-gradient-to-br from-emerald-50/50 to-teal-50/50 dark:from-emerald-900/20 dark:to-teal-900/20 border-emerald-200/50 dark:border-emerald-800/50'
+                                    : 'hover:border-emerald-100 dark:hover:border-emerald-900/30'
                                     }`}
                             >
                                 {isCompleted && (
@@ -315,7 +324,7 @@ const GoalsPage: React.FC = () => {
                                     )}
                                 </div>
 
-                                <div className="flex justify-between items-end mb-6 p-4 rounded-xl bg-gray-50 dark:bg-gray-900/30 border border-gray-100 dark:border-white/5 relative z-10">
+                                <div className="flex justify-between items-end mb-6 p-4 rounded-xl bg-gray-50/50 dark:bg-gray-900/30 border border-gray-100/50 dark:border-white/5 relative z-10 backdrop-blur-sm">
                                     <div className="text-sm">
                                         <span className="block text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wide mb-1">Terkumpul</span>
                                         <span className="font-bold text-emerald-600 dark:text-emerald-400 text-lg">{formatCurrency(goal.currentAmount)}</span>
@@ -354,7 +363,7 @@ const GoalsPage: React.FC = () => {
                     })}
                 </div>
             ) : (
-                <div className="p-12 rounded-[24px] bg-white dark:bg-gray-800 border border-gray-100 dark:border-white/5 text-center shadow-sm">
+                <div className="glass-panel p-12 rounded-[24px] text-center shadow-sm">
                     <div className="w-20 h-20 rounded-full bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center text-4xl mb-4 mx-auto animate-bounce-slow">
                         🎯
                     </div>
@@ -429,7 +438,7 @@ const GoalsPage: React.FC = () => {
                             type="text"
                             value={savingsDescription}
                             onChange={(e) => setSavingsDescription(e.target.value)}
-                            className="w-full h-14 px-4 rounded-2xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary text-base font-medium transition-all"
+                            className="w-full h-14 px-4 rounded-2xl bg-gray-50/50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary text-base font-medium transition-all backdrop-blur-sm"
                             placeholder="Contoh: Tabungan mingguan"
                         />
                     </div>

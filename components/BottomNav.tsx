@@ -76,90 +76,84 @@ const BottomNav: React.FC<BottomNavProps> = ({ onScanClick }) => {
     };
 
     return (
-        // Premium Glass Navbar - Fixed at bottom
-        <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-[#0A0F1A]/95 backdrop-blur-2xl border-t border-gray-200/30 dark:border-white/5 md:hidden">
-            {/* Safe area padding */}
-            <div style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
-                <div className="flex justify-around items-center h-[68px] px-2 relative">
-                    {/* Left navigation items */}
-                    {leftNavItems.map((item) => (
-                        <NavLink
-                            key={item.path}
-                            to={item.path}
-                            className={({ isActive }) =>
-                                `flex flex-col items-center justify-center gap-1 min-w-[60px] py-2.5 rounded-2xl transition-all duration-200 active:scale-95 ${isActive
-                                    ? 'text-primary'
-                                    : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'
-                                }`
-                            }
-                        >
-                            {({ isActive }) => (
-                                <>
-                                    <div className={`p-1.5 rounded-xl transition-all duration-200 ${isActive ? 'bg-primary/10 dark:bg-primary/20' : ''}`}>
-                                        <item.icon className={`w-6 h-6 transition-transform ${isActive ? 'text-primary scale-110' : ''}`} />
-                                    </div>
-                                    <span className={`text-[11px] font-semibold tracking-tight ${isActive ? 'text-primary' : ''}`}>
-                                        {item.label}
-                                    </span>
-                                </>
-                            )}
-                        </NavLink>
-                    ))}
+        // Floating Dock Navigation Container
+        <div className="fixed bottom-6 left-0 right-0 z-40 flex justify-center px-4 md:hidden pointer-events-none">
 
-                    {/* Premium Center Button */}
-                    <div className="relative flex items-center justify-center w-16">
-                        {/* Glow effect - Adjusted to be more subtle and centered */}
-                        <div className="absolute -top-8 left-1/2 -translate-x-1/2 w-12 h-12 rounded-full bg-primary/40 blur-xl" />
-                        <button
-                            onClick={handleAddClick}
-                            className="
-                                absolute -top-10 left-1/2 -translate-x-1/2
-                                flex items-center justify-center
-                                w-[64px] h-[64px]
-                                rounded-full
-                                bg-gradient-to-tr from-primary via-emerald-500 to-teal-400
-                                text-white
-                                shadow-[0_8px_20px_-6px_rgba(16,185,129,0.5)]
-                                hover:shadow-[0_12px_24px_-8px_rgba(16,185,129,0.6)]
-                                hover:scale-105
-                                transition-all duration-300 cubic-bezier(0.34, 1.56, 0.64, 1)
-                                active:scale-95
-                                border-[3px] border-white dark:border-[#0A0F1A]
-                                z-50
-                            "
-                            aria-label="Tambah Transaksi AI"
-                        >
-                            <PlusIcon className="w-8 h-8 drop-shadow-sm" />
-                        </button>
-                    </div>
+            {/* The Dock Itself (Glassmorphism) */}
+            <nav className="pointer-events-auto flex items-center gap-1 p-2 bg-white/80 dark:bg-[#0A0F1A]/80 backdrop-blur-2xl border border-white/20 dark:border-white/10 shadow-2xl shadow-black/20 rounded-3xl ring-1 ring-black/5 dark:ring-white/5">
 
-                    {/* Right navigation items */}
-                    {rightNavItems.map((item) => (
-                        <NavLink
-                            key={item.path}
-                            to={item.path}
-                            className={({ isActive }) =>
-                                `flex flex-col items-center justify-center gap-1 min-w-[60px] py-2.5 rounded-2xl transition-all duration-200 active:scale-95 ${isActive
-                                    ? 'text-primary'
-                                    : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'
-                                }`
-                            }
-                        >
-                            {({ isActive }) => (
-                                <>
-                                    <div className={`p-1.5 rounded-xl transition-all duration-200 ${isActive ? 'bg-primary/10 dark:bg-primary/20' : ''}`}>
-                                        <item.icon className={`w-6 h-6 transition-transform ${isActive ? 'text-primary scale-110' : ''}`} />
-                                    </div>
-                                    <span className={`text-[11px] font-semibold tracking-tight ${isActive ? 'text-primary' : ''}`}>
-                                        {item.label}
-                                    </span>
-                                </>
-                            )}
-                        </NavLink>
-                    ))}
+                {/* Left navigation items */}
+                {leftNavItems.map((item) => (
+                    <NavLink
+                        key={item.path}
+                        to={item.path}
+                        className={({ isActive }) =>
+                            `relative flex items-center justify-center w-12 h-12 rounded-2xl transition-all duration-300 ${isActive
+                                ? 'bg-gray-100 dark:bg-white/10 text-primary scale-100'
+                                : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5'
+                            }`
+                        }
+                    >
+                        {({ isActive }) => (
+                            <>
+                                <item.icon className={`w-6 h-6 transition-transform duration-300 ${isActive ? 'scale-110' : 'scale-100'}`} />
+                                {isActive && (
+                                    <span className="absolute -bottom-1 w-1 h-1 rounded-full bg-primary" />
+                                )}
+                            </>
+                        )}
+                    </NavLink>
+                ))}
+
+                {/* Premium Center Button (Floating slightly higher) */}
+                <div className="mx-1 relative -mt-6">
+                    <div className="absolute inset-x-2 top-2 bottom-0 bg-primary/40 blur-lg rounded-full" />
+                    <button
+                        onClick={handleAddClick}
+                        className="
+                            relative flex items-center justify-center
+                            w-16 h-16
+                            rounded-full
+                            bg-gradient-to-tr from-primary via-emerald-500 to-teal-400
+                            text-white
+                            shadow-xl shadow-primary/30
+                            hover:shadow-2xl hover:shadow-primary/50
+                            hover:scale-105 hover:-translate-y-1
+                            active:scale-95 active:translate-y-0
+                            transition-all duration-300 cubic-bezier(0.34, 1.56, 0.64, 1)
+                            border-[4px] border-white dark:border-[#0A0F1A]
+                            group
+                        "
+                        aria-label="Tambah Transaksi AI"
+                    >
+                        <PlusIcon className="w-8 h-8 drop-shadow-sm group-hover:rotate-90 transition-transform duration-300" />
+                    </button>
                 </div>
-            </div>
-        </nav>
+
+                {/* Right navigation items */}
+                {rightNavItems.map((item) => (
+                    <NavLink
+                        key={item.path}
+                        to={item.path}
+                        className={({ isActive }) =>
+                            `relative flex items-center justify-center w-12 h-12 rounded-2xl transition-all duration-300 ${isActive
+                                ? 'bg-gray-100 dark:bg-white/10 text-primary scale-100'
+                                : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5'
+                            }`
+                        }
+                    >
+                        {({ isActive }) => (
+                            <>
+                                <item.icon className={`w-6 h-6 transition-transform duration-300 ${isActive ? 'scale-110' : 'scale-100'}`} />
+                                {isActive && (
+                                    <span className="absolute -bottom-1 w-1 h-1 rounded-full bg-primary" />
+                                )}
+                            </>
+                        )}
+                    </NavLink>
+                ))}
+            </nav>
+        </div>
     );
 };
 

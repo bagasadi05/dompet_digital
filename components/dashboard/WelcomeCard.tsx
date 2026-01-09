@@ -42,29 +42,39 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({ userName, onAIAssistantClick 
     };
 
     return (
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-indigo-700 p-5 text-white shadow-xl shadow-blue-500/20">
+        <div className="relative overflow-hidden rounded-2xl p-6 shadow-xl shadow-blue-500/20 group">
+
+            {/* Background with Noise Texture (Glass Effect) */}
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-indigo-600 to-indigo-700 transition-transform duration-500 group-hover:scale-105"></div>
+
+            {/* Noise Overlay */}
+            <div className="absolute inset-0 z-0 opacity-10 bg-[url('data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.65\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\' opacity=\'1\'/%3E%3C/svg%3E')] mix-blend-overlay pointer-events-none"></div>
+
             {/* Decorative blur elements - Requirement 2.3 */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-white/10 blur-3xl"></div>
-                <div className="absolute -bottom-16 -left-16 h-40 w-40 rounded-full bg-indigo-400/20 blur-3xl"></div>
-                <div className="absolute top-1/2 right-1/4 h-24 w-24 rounded-full bg-blue-400/10 blur-2xl"></div>
+            <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+                <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-white/20 blur-3xl opacity-50 mix-blend-overlay"></div>
+                <div className="absolute -bottom-16 -left-16 h-40 w-40 rounded-full bg-indigo-400/30 blur-3xl opacity-50"></div>
+                <div className="absolute top-1/2 right-1/4 h-24 w-24 rounded-full bg-blue-400/20 blur-2xl opacity-40"></div>
             </div>
+
+            {/* Shine Effect on Hover */}
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%]"></div>
 
             {/* Content */}
             <div className="relative z-10">
                 {/* Personalized greeting - Requirement 2.1 */}
-                <div className="flex items-center gap-2 mb-1">
+                <div className="flex items-center gap-2 mb-2">
                     <SparklesIcon className="w-4 h-4 text-yellow-300 animate-sparkle" />
-                    <span className="text-xs font-medium text-blue-100/80 uppercase tracking-wide">
+                    <span className="text-xs font-bold text-blue-100/90 uppercase tracking-widest">
                         Selamat Datang
                     </span>
                 </div>
 
-                <h2 className="text-xl font-bold mb-4">
+                <h2 className="text-2xl font-extrabold mb-1 text-white tracking-tight">
                     Hai, {userName}! 👋
                 </h2>
 
-                <p className="text-sm text-blue-100/70 mb-4">
+                <p className="text-sm font-medium text-blue-100/80 mb-6 max-w-[80%]">
                     Ada yang bisa dibantu dengan keuanganmu hari ini?
                 </p>
 
@@ -73,20 +83,21 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({ userName, onAIAssistantClick 
                     onClick={handleAIClick}
                     className="
                         inline-flex items-center gap-2 
-                        px-4 py-2.5 
+                        px-5 py-3
                         rounded-xl 
-                        bg-white/20 
-                        hover:bg-white/30 
-                        backdrop-blur-sm 
-                        font-medium text-sm
-                        transition-all duration-200
+                        bg-white/10 
+                        hover:bg-white/20 
+                        backdrop-blur-md border border-white/20
+                        font-semibold text-sm text-white
+                        transition-all duration-300
+                        hover:scale-105 hover:shadow-lg hover:shadow-black/10
                         active:scale-95
-                        group
+                        group/btn
                     "
                 >
-                    <SparklesIcon className="w-4 h-4 text-yellow-300 group-hover:animate-sparkle" />
+                    <SparklesIcon className="w-5 h-5 text-yellow-300 group-hover/btn:animate-spin" />
                     <span>Tanya AI Sekarang</span>
-                    <ArrowRightIcon className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                    <ArrowRightIcon className="w-4 h-4 transition-transform group-hover/btn:translate-x-1" />
                 </button>
             </div>
         </div>

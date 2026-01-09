@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Transaction, TransactionType, Category, expenseCategories, incomeCategories } from '../services/types';
+import CountUp from './common/CountUp';
 import Modal from './common/Modal';
 import CurrencyInput from './common/CurrencyInput';
 import ConfirmDialog from './common/ConfirmDialog';
@@ -22,8 +23,8 @@ import { exportTransactionsToPDF } from '../utils/exportUtils';
 import { formatCurrency, formatDate, getCategoryEmoji, getCategoryColor } from '../utils';
 import ReceiptScanner from './ReceiptScanner';
 import { ReceiptScanResult } from '../services/receiptScanService';
-import VoiceInputModal from './VoiceInputModal';
-import { ParsedTransaction } from '../services/voiceParserService';
+// import VoiceInputModal from './VoiceInputModal';
+// import { ParsedTransaction } from '../services/voiceParserService';
 
 // Form Component
 // Form Component
@@ -105,9 +106,9 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ onSubmit, onClose, on
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
             {/* Premium Type Toggle */}
-            <div className="flex p-1 bg-gray-100 dark:bg-gray-800 rounded-2xl relative">
+            <div className="flex p-1.5 bg-gray-100/50 dark:bg-black/20 rounded-2xl relative border border-gray-200/50 dark:border-white/10 backdrop-blur-sm">
                 <div
-                    className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-white dark:bg-gray-700 rounded-xl shadow-sm transition-all duration-300 ease-spring ${formData.type === TransactionType.INCOME ? 'translate-x-[calc(100%+4px)]' : 'translate-x-0'
+                    className={`absolute top-1.5 bottom-1.5 w-[calc(50%-6px)] bg-white dark:bg-gray-700/80 rounded-xl shadow-sm transition-all duration-300 ease-spring border border-gray-100 dark:border-white/5 ${formData.type === TransactionType.INCOME ? 'translate-x-[calc(100%+6px)]' : 'translate-x-0'
                         }`}
                 />
                 <button
@@ -145,7 +146,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ onSubmit, onClose, on
                         value={formData.description}
                         onChange={handleChange}
                         required
-                        className="w-full h-14 px-4 rounded-2xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-base font-medium placeholder:text-gray-400"
+                        className="w-full h-14 px-4 rounded-2xl bg-gray-50/50 dark:bg-gray-800/50 border border-gray-200/80 dark:border-gray-700/80 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-base font-medium placeholder:text-gray-400 backdrop-blur-sm"
                         placeholder="Contoh: Belanja bulanan"
                     />
                 </div>
@@ -158,7 +159,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ onSubmit, onClose, on
                             value={formData.category}
                             onChange={handleChange}
                             required
-                            className="w-full h-14 px-4 pr-10 rounded-2xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary appearance-none cursor-pointer transition-all text-base font-medium"
+                            className="w-full h-14 px-4 pr-10 rounded-2xl bg-gray-50/50 dark:bg-gray-800/50 border border-gray-200/80 dark:border-gray-700/80 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary appearance-none cursor-pointer transition-all text-base font-medium backdrop-blur-sm"
                         >
                             {currentCategories.map(cat => <option key={cat} value={cat}>{getCategoryEmoji(cat)} {cat}</option>)}
                         </select>
@@ -175,7 +176,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ onSubmit, onClose, on
                                 value={formData.goalId || ''}
                                 onChange={handleChange}
                                 required
-                                className="w-full h-14 px-4 pr-10 rounded-2xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary appearance-none cursor-pointer transition-all text-base font-medium"
+                                className="w-full h-14 px-4 pr-10 rounded-2xl bg-gray-50/50 dark:bg-gray-800/50 border border-gray-200/80 dark:border-gray-700/80 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary appearance-none cursor-pointer transition-all text-base font-medium backdrop-blur-sm"
                             >
                                 <option value="" disabled>Pilih Impian...</option>
                                 {goals.length > 0 ? (
@@ -197,7 +198,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ onSubmit, onClose, on
                                 name="billId"
                                 value={formData.billId || ''}
                                 onChange={(e) => handleBillSelect(e.target.value)}
-                                className="w-full h-14 px-4 pr-10 rounded-2xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary appearance-none cursor-pointer transition-all text-base font-medium"
+                                className="w-full h-14 px-4 pr-10 rounded-2xl bg-gray-50/50 dark:bg-gray-800/50 border border-gray-200/80 dark:border-gray-700/80 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary appearance-none cursor-pointer transition-all text-base font-medium backdrop-blur-sm"
                             >
                                 <option value="">Tidak ada / Manual</option>
                                 {bills.length > 0 ? (
@@ -220,7 +221,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ onSubmit, onClose, on
                         value={formData.date}
                         onChange={handleChange}
                         required
-                        className="w-full h-14 px-4 rounded-2xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-base font-medium"
+                        className="w-full h-14 px-4 rounded-2xl bg-gray-50/50 dark:bg-gray-800/50 border border-gray-200/80 dark:border-gray-700/80 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-base font-medium backdrop-blur-sm"
                     />
                 </div>
             </div>
@@ -279,7 +280,7 @@ const TransactionsPage: React.FC<TransactionsPageProps> = ({ isSimplified, onClo
     const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
     const [deleteConfirm, setDeleteConfirm] = useState<Transaction | null>(null);
     const [isScannerOpen, setIsScannerOpen] = useState(false);
-    const [isVoiceOpen, setIsVoiceOpen] = useState(false);
+    // const [isVoiceOpen, setIsVoiceOpen] = useState(false);
 
     // Filter States
     const [typeFilter, setTypeFilter] = useState<'all' | TransactionType>('all');
@@ -353,6 +354,7 @@ const TransactionsPage: React.FC<TransactionsPageProps> = ({ isSimplified, onClo
         }
     };
 
+    /*
     const handleVoiceResult = (result: ParsedTransaction) => {
         if (result.success) {
             setEditingTransaction({
@@ -371,6 +373,7 @@ const TransactionsPage: React.FC<TransactionsPageProps> = ({ isSimplified, onClo
             });
         }
     };
+    */
 
     // Filtered & Paginated Transactions
     const filteredTransactions = useMemo(() => {
@@ -472,14 +475,7 @@ const TransactionsPage: React.FC<TransactionsPageProps> = ({ isSimplified, onClo
                         <CameraIcon className="w-5 h-5 drop-shadow-sm" />
                         <span>Scan Struk</span>
                     </button>
-                    <button
-                        onClick={() => setIsVoiceOpen(true)}
-                        className="h-12 px-5 flex items-center gap-2 text-white rounded-2xl font-bold text-sm transition-all shadow-lg active:scale-95 border border-white/20"
-                        style={{ background: 'linear-gradient(to right, #6366F1, #8B5CF6)' }}
-                    >
-                        <span className="text-lg drop-shadow-sm">🎤</span>
-                        <span>Suara</span>
-                    </button>
+                    {/* Voice Button Removed */}
                     <button
                         onClick={() => setIsModalOpen(true)}
                         className="h-12 px-5 flex items-center gap-2 text-white rounded-2xl font-bold text-sm transition-all shadow-lg shadow-primary/30 active:scale-95 border border-white/20"
@@ -504,13 +500,7 @@ const TransactionsPage: React.FC<TransactionsPageProps> = ({ isSimplified, onClo
                     >
                         <CameraIcon className="w-6 h-6 drop-shadow-sm" />
                     </button>
-                    <button
-                        onClick={() => setIsVoiceOpen(true)}
-                        className="h-12 flex-1 flex items-center justify-center gap-2 text-white rounded-2xl font-bold text-sm transition-all active:scale-95 shadow-md border border-white/20"
-                        style={{ background: 'linear-gradient(to right, #6366F1, #8B5CF6)' }}
-                    >
-                        <span className="text-xl drop-shadow-sm">🎤</span>
-                    </button>
+                    {/* Mobile Voice Button Removed */}
                 </div>
             </div>
 
@@ -523,31 +513,35 @@ const TransactionsPage: React.FC<TransactionsPageProps> = ({ isSimplified, onClo
                 <PlusIcon className="w-7 h-7 drop-shadow-sm" />
             </button>
 
-            {/* Stats Cards */}
+            {/* Stats Cards - Premium Glass */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="relative overflow-hidden flex flex-col gap-2 p-6 rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-white/5 shadow-sm group hover:shadow-md transition-all">
-                    <div className="absolute right-0 top-0 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl -mr-6 -mt-6 pointer-events-none group-hover:bg-emerald-500/20 transition-colors" />
+                <div className="glass-panel relative overflow-hidden flex flex-col gap-2 p-6 rounded-[1.5rem] group hover:scale-[1.02] transition-all duration-300">
+                    <div className="absolute right-0 top-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-3xl -mr-8 -mt-8 pointer-events-none group-hover:bg-emerald-500/20 transition-colors" />
                     <div className="flex justify-between items-center relative z-10">
                         <p className="text-gray-500 dark:text-gray-400 font-bold text-xs uppercase tracking-wider">Pemasukan</p>
-                        <div className="bg-emerald-100 dark:bg-emerald-500/20 p-2 rounded-xl text-emerald-600 dark:text-emerald-400">
-                            <ArrowDownIcon className="w-4 h-4" />
+                        <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                            <ArrowDownIcon className="w-5 h-5" />
                         </div>
                     </div>
-                    <p className="text-2xl font-extrabold text-gray-900 dark:text-white tracking-tight relative z-10">{formatCurrency(stats.totalIncome)}</p>
+                    <p className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight relative z-10">
+                        <CountUp end={stats.totalIncome} formattingFn={formatCurrency} />
+                    </p>
                 </div>
-                <div className="relative overflow-hidden flex flex-col gap-2 p-6 rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-white/5 shadow-sm group hover:shadow-md transition-all">
-                    <div className="absolute right-0 top-0 w-24 h-24 bg-rose-500/10 rounded-full blur-2xl -mr-6 -mt-6 pointer-events-none group-hover:bg-rose-500/20 transition-colors" />
+                <div className="glass-panel relative overflow-hidden flex flex-col gap-2 p-6 rounded-[1.5rem] group hover:scale-[1.02] transition-all duration-300">
+                    <div className="absolute right-0 top-0 w-32 h-32 bg-rose-500/10 rounded-full blur-3xl -mr-8 -mt-8 pointer-events-none group-hover:bg-rose-500/20 transition-colors" />
                     <div className="flex justify-between items-center relative z-10">
                         <p className="text-gray-500 dark:text-gray-400 font-bold text-xs uppercase tracking-wider">Pengeluaran</p>
-                        <div className="bg-rose-100 dark:bg-rose-500/20 p-2 rounded-xl text-rose-600 dark:text-rose-400">
-                            <ArrowUpIcon className="w-4 h-4" />
+                        <div className="w-10 h-10 rounded-xl bg-rose-100 dark:bg-rose-500/10 flex items-center justify-center text-rose-600 dark:text-rose-400">
+                            <ArrowUpIcon className="w-5 h-5" />
                         </div>
                     </div>
-                    <p className="text-2xl font-extrabold text-gray-900 dark:text-white tracking-tight relative z-10">{formatCurrency(stats.totalExpense)}</p>
+                    <p className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight relative z-10">
+                        <CountUp end={stats.totalExpense} formattingFn={formatCurrency} />
+                    </p>
                 </div>
             </div>
 
-            {/* Filters */}
+            {/* Filters - Glass Style */}
             <div className="flex flex-col md:flex-row gap-3">
                 <div className="flex-1 relative group">
                     <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-primary transition-colors" />
@@ -556,7 +550,7 @@ const TransactionsPage: React.FC<TransactionsPageProps> = ({ isSimplified, onClo
                         placeholder="Cari transaksi..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full h-12 pl-12 pr-4 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm font-medium transition-all shadow-sm"
+                        className="w-full h-12 pl-12 pr-4 rounded-2xl bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border border-gray-200/50 dark:border-white/10 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm font-medium transition-all shadow-sm hover:bg-white dark:hover:bg-gray-800"
                     />
                 </div>
                 <div className="flex gap-3 overflow-x-auto pb-2 md:pb-0 no-scrollbar">
@@ -565,7 +559,7 @@ const TransactionsPage: React.FC<TransactionsPageProps> = ({ isSimplified, onClo
                             <select
                                 value={typeFilter}
                                 onChange={(e) => setTypeFilter(e.target.value as TransactionType | 'all')}
-                                className="w-full h-12 pl-4 pr-10 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm font-medium appearance-none cursor-pointer shadow-sm"
+                                className="w-full h-12 pl-4 pr-10 rounded-2xl bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border border-gray-200/50 dark:border-white/10 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm font-medium appearance-none cursor-pointer shadow-sm hover:bg-white dark:hover:bg-gray-800 transition-colors"
                             >
                                 <option value="all">Semua Tipe</option>
                                 <option value={TransactionType.INCOME}>Pemasukan</option>
@@ -579,7 +573,7 @@ const TransactionsPage: React.FC<TransactionsPageProps> = ({ isSimplified, onClo
                             <select
                                 value={categoryFilter}
                                 onChange={(e) => setCategoryFilter(e.target.value)}
-                                className="w-full h-12 pl-4 pr-10 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm font-medium appearance-none cursor-pointer shadow-sm"
+                                className="w-full h-12 pl-4 pr-10 rounded-2xl bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border border-gray-200/50 dark:border-white/10 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm font-medium appearance-none cursor-pointer shadow-sm hover:bg-white dark:hover:bg-gray-800 transition-colors"
                             >
                                 <option value="all">Semua Kategori</option>
                                 {uniqueCategories.map(cat => (
@@ -591,7 +585,7 @@ const TransactionsPage: React.FC<TransactionsPageProps> = ({ isSimplified, onClo
                     </div>
                     <button
                         onClick={() => refreshData()}
-                        className="h-12 w-12 flex-none flex items-center justify-center bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-500 hover:text-primary transition-all shadow-sm active:scale-95"
+                        className="h-12 w-12 flex-none flex items-center justify-center bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border border-gray-200/50 dark:border-white/10 rounded-2xl hover:bg-white dark:hover:bg-gray-800 text-gray-500 hover:text-primary transition-all shadow-sm active:scale-95"
                         title="Refresh Data"
                     >
                         <RefreshIcon className="w-5 h-5" />
@@ -599,7 +593,7 @@ const TransactionsPage: React.FC<TransactionsPageProps> = ({ isSimplified, onClo
                     {(typeFilter !== 'all' || categoryFilter !== 'all' || searchQuery) && (
                         <button
                             onClick={resetFilters}
-                            className="h-12 px-5 flex-none text-sm font-bold text-rose-500 bg-rose-50 dark:bg-rose-900/10 hover:bg-rose-100 dark:hover:bg-rose-900/20 rounded-2xl transition-colors whitespace-nowrap"
+                            className="h-12 px-5 flex-none text-sm font-bold text-rose-500 bg-rose-50 dark:bg-rose-900/10 hover:bg-rose-100 dark:hover:bg-rose-900/20 rounded-2xl transition-colors whitespace-nowrap border border-rose-100 dark:border-rose-900/20"
                         >
                             Reset
                         </button>
@@ -608,7 +602,7 @@ const TransactionsPage: React.FC<TransactionsPageProps> = ({ isSimplified, onClo
             </div>
 
             {/* Transactions List - Premium Card Layout */}
-            <div className="bg-white dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm overflow-hidden">
+            <div className="glass-panel rounded-[1.5rem] shadow-sm overflow-hidden min-h-[500px]">
                 {paginatedTransactions.length > 0 ? (
                     <div>
                         {/* Desktop Table View */}
@@ -791,11 +785,7 @@ const TransactionsPage: React.FC<TransactionsPageProps> = ({ isSimplified, onClo
             )}
 
             {/* Voice Input Modal */}
-            <VoiceInputModal
-                isOpen={isVoiceOpen}
-                onClose={() => setIsVoiceOpen(false)}
-                onResult={handleVoiceResult}
-            />
+            {/* VoiceInputModal Removed */}
         </div>
     );
 };

@@ -51,6 +51,12 @@ interface Goal {
 Deno.serve(async (req: Request) => {
   try {
     const update = await req.json()
+
+    // 0. Handle Scheduled Tasks (Cron)
+    if (update.type === 'daily_recap') {
+        await handleDailyRecap()
+        return new Response('Recap Sent', { status: 200 })
+    }
     
     if (update.message && update.message.text) {
       const chatId = update.message.chat.id.toString()
@@ -467,6 +473,81 @@ async function handleDeleteTransaction(chatId: string, userId: string) {
 
     const icon = data.type === 'pemasukan' ? '💰' : '💸'
     await sendTelegramMessage(chatId, `🗑️ *Transaksi Dihapus:*\n\n${icon} ${data.description}\n💵 ${formatRupiah(data.amount)}`)
+}
+
+async function handleDailyRecap() {
+    console.log('[Daily Recap] Starting...')
+    
+    // 1. Get all users with connected Telegram
+    const { data: users, error } = await supabase
+        .from('user_profiles')
+        .select('user_id, telegram_chat_id')
+        .not('telegram_chat_id', 'is', null)
+
+    if (error || !users) {
+        console.error('[Daily Recap] Error fetching users:', error)
+        return
+    }
+
+    console.log(`[Daily Recap] Processing ${users.length} users...`)
+
+    // 2. Process each user
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const todayISO = today.toISOString()
+
+    for (const user of users) {
+        const { user_id, telegram_chat_id } = user
+        if (!telegram_chat_id) continue
+
+        // A. Get Today's Transactions
+        const { data: todayTx } = await supabase
+            .from('transactions')
+            .select('amount, type')
+            .eq('user_id', user_id)
+            .gte('date', todayISO)
+
+        // B. Get Total Balance (All Time)
+        const { data: allTx } = await supabase
+            .from('transactions')
+            .select('amount, type')
+            .eq('user_id', user_id)
+        
+        // Calculate totals
+        let todayIncome = 0
+        let todayExpense = 0
+        todayTx?.forEach((t: { amount: number; type: string }) => {
+            if (t.type === 'pemasukan') todayIncome += t.amount
+            else todayExpense += t.amount
+        })
+
+        let totalBalance = 0
+        allTx?.forEach((t: { amount: number; type: string }) => {
+            if (t.type === 'pemasukan') totalBalance += t.amount
+            else totalBalance -= t.amount
+        })
+
+        // C. Send Message
+        const hasTransactionToday = todayTx && todayTx.length > 0
+        let msg = ''
+
+        if (hasTransactionToday) {
+            msg = `🌙 *Ringkasan Harian*\n\n` +
+                  `Hari ini kamu mencatat ${todayTx.length} transaksi.\n` +
+                  `📉 Pengeluaran: ${formatRupiah(todayExpense)}\n` +
+                  `📈 Pemasukan: ${formatRupiah(todayIncome)}\n\n` +
+                  `💰 *Sisa Saldo: ${formatRupiah(totalBalance)}*\n\n` +
+                  `Istirahat yang cukup ya! 😴`
+        } else {
+            msg = `👋 *Halo! Belum ada kabar nih*\n\n` +
+                  `Sepertinya kamu belum mencatat transaksi hari ini. Ada yang terlupa? 🤔\n\n` +
+                  `💰 *Saldo Saat Ini: ${formatRupiah(totalBalance)}*\n\n` +
+                  `Yuk catat sekarang: _"Beli makan malam 25rb"_`
+        }
+
+        await sendTelegramMessage(telegram_chat_id, msg)
+    }
+    console.log('[Daily Recap] Done.')
 }
 
 // === HELPERS ===

@@ -24,7 +24,7 @@ interface DataContextType {
     addGoal: (data: Omit<Goal, 'id' | 'currentAmount'>) => Promise<void>;
     updateGoal: (data: Omit<Goal, 'currentAmount'>) => Promise<void>;
     deleteGoal: (id: string) => Promise<void>;
-    addBill: (data: Omit<Bill, 'id'>) => Promise<void>;
+    addBill: (data: Omit<Bill, 'id'>) => Promise<Bill | undefined>;
     updateBill: (data: Bill) => Promise<void>;
     deleteBill: (id: string) => Promise<void>;
     payBill: (bill: Bill) => Promise<void>;
@@ -261,11 +261,13 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (newBill) {
                 setBills(prev => [...prev, newBill].sort((a, b) => new Date(a.nextDueDate).getTime() - new Date(b.nextDueDate).getTime()));
                 showToast({ type: 'success', title: 'Tagihan ditambahkan', message: `"${data.name}" berhasil disimpan.` });
+                return newBill;
             }
         } catch (error: any) {
             showToast({ type: 'error', title: 'Gagal menambah tagihan', message: error.message });
             throw error;
         }
+        return undefined;
     };
 
     const updateBill = async (data: Bill) => {

@@ -66,7 +66,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             />
 
             {/* Dialog */}
-            <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full p-6 animate-scaleIn">
+            <div className="relative bg-white/90 dark:bg-[#0A0F1A]/90 backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-[2rem] shadow-2xl max-w-md w-full p-6 animate-scaleIn ring-1 ring-black/5 dark:ring-white/5">
                 <div className="flex items-start gap-4">
                     <div className={`flex-shrink-0 w-12 h-12 rounded-full ${styles.iconBg} flex items-center justify-center`}>
                         {styles.icon}
@@ -81,14 +81,14 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
                     <button
                         onClick={onClose}
                         disabled={isLoading}
-                        className="flex-1 h-11 px-4 text-sm font-bold text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors disabled:opacity-50"
+                        className="flex-1 h-12 px-4 text-sm font-bold text-gray-700 dark:text-gray-200 bg-gray-100/50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl hover:bg-gray-200 dark:hover:bg-white/10 transition-colors disabled:opacity-50"
                     >
                         {cancelText}
                     </button>
                     <button
                         onClick={onConfirm}
                         disabled={isLoading}
-                        className={`flex-1 h-11 px-4 text-sm font-bold text-white rounded-xl shadow-lg transition-all active:scale-95 disabled:opacity-50 ${styles.button}`}
+                        className={`flex-1 h-12 px-4 text-sm font-bold text-white rounded-2xl shadow-lg transition-all active:scale-95 disabled:opacity-50 ${styles.button}`}
                     >
                         {isLoading ? (
                             <span className="flex items-center justify-center gap-2">

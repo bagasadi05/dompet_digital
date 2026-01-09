@@ -58,8 +58,8 @@ const PlanningPage: React.FC = () => {
                 </p>
             </div>
 
-            {/* Tab Navigation */}
-            <div className="bg-white dark:bg-gray-800 rounded-[20px] border border-gray-100 dark:border-white/5 shadow-sm p-2 flex gap-2">
+            {/* Tab Navigation - Glass Pill */}
+            <div className="glass-panel p-1.5 flex gap-2 rounded-[1.5rem] relative overflow-hidden backdrop-blur-md">
                 {tabs.map(tab => {
                     const Icon = tab.icon;
                     const isActive = activeTab === tab.id;
@@ -67,11 +67,14 @@ const PlanningPage: React.FC = () => {
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
-                            className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-2xl text-sm font-bold transition-all duration-300 ${isActive
-                                ? 'bg-gradient-to-r from-primary to-emerald-500 text-white shadow-lg shadow-primary/30 scale-[1.02]'
-                                : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white'
+                            className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-2xl text-sm font-bold transition-all duration-300 relative z-10 ${isActive
+                                ? 'text-white shadow-lg shadow-primary/30'
+                                : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
                                 }`}
                         >
+                            {isActive && (
+                                <div className="absolute inset-0 bg-gradient-to-r from-primary to-emerald-500 rounded-2xl -z-10 animate-fadeIn" />
+                            )}
                             <Icon className={`w-5 h-5 ${isActive ? 'drop-shadow-sm' : ''}`} />
                             <span className="hidden sm:inline">{tab.label}</span>
                         </button>

@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import CountUp from './common/CountUp';
 import { Budget, Category, TransactionType, expenseCategories } from '../services/types';
 import Modal from './common/Modal';
 import CurrencyInput from './common/CurrencyInput';
@@ -101,7 +102,7 @@ const BudgetForm: React.FC<BudgetFormProps> = ({ onSubmit, onClose, initialData,
                         onChange={handleChange}
                         required
                         disabled={!!initialData}
-                        className="w-full h-14 px-4 pr-10 rounded-2xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary disabled:opacity-50 disabled:cursor-not-allowed appearance-none transition-all text-base font-medium cursor-pointer"
+                        className="w-full h-14 px-4 pr-10 rounded-2xl bg-gray-50/50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary disabled:opacity-50 disabled:cursor-not-allowed appearance-none transition-all text-base font-medium cursor-pointer backdrop-blur-sm"
                     >
                         {availableCategories.length > 0
                             ? availableCategories.map(cat => <option key={cat} value={cat}>{getCategoryEmoji(cat)} {cat}</option>)
@@ -228,27 +229,31 @@ const BudgetsPage: React.FC = () => {
 
             {/* Stats Cards */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="p-5 rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-white/5 shadow-sm group hover:shadow-md transition-all">
+                <div className="glass-panel p-5 rounded-[1.5rem] group hover:scale-[1.02] transition-all duration-300">
                     <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Total Anggaran</p>
-                    <p className="text-xl md:text-2xl font-extrabold text-gray-900 dark:text-white tracking-tight">{formatCurrency(stats.totalBudget)}</p>
-                </div>
-                <div className="p-5 rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-white/5 shadow-sm group hover:shadow-md transition-all">
-                    <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Terpakai</p>
-                    <p className="text-xl md:text-2xl font-extrabold text-orange-500 dark:text-orange-400 tracking-tight">{formatCurrency(stats.totalSpent)}</p>
-                </div>
-                <div className="p-5 rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-white/5 shadow-sm group hover:shadow-md transition-all">
-                    <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Sisa</p>
-                    <p className={`text-xl md:text-2xl font-extrabold tracking-tight ${stats.remaining >= 0 ? 'text-emerald-500 dark:text-emerald-400' : 'text-rose-500 dark:text-rose-400'}`}>
-                        {formatCurrency(stats.remaining)}
+                    <p className="text-xl md:text-2xl font-extrabold text-gray-900 dark:text-white tracking-tight">
+                        <CountUp end={stats.totalBudget} formattingFn={formatCurrency} />
                     </p>
                 </div>
-                <div className="p-5 rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-white/5 shadow-sm group hover:shadow-md transition-all">
+                <div className="glass-panel p-5 rounded-[1.5rem] group hover:scale-[1.02] transition-all duration-300">
+                    <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Terpakai</p>
+                    <p className="text-xl md:text-2xl font-extrabold text-orange-500 dark:text-orange-400 tracking-tight">
+                        <CountUp end={stats.totalSpent} formattingFn={formatCurrency} />
+                    </p>
+                </div>
+                <div className="glass-panel p-5 rounded-[1.5rem] group hover:scale-[1.02] transition-all duration-300">
+                    <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Sisa</p>
+                    <p className={`text-xl md:text-2xl font-extrabold tracking-tight ${stats.remaining >= 0 ? 'text-emerald-500 dark:text-emerald-400' : 'text-rose-500 dark:text-rose-400'}`}>
+                        <CountUp end={stats.remaining} formattingFn={formatCurrency} />
+                    </p>
+                </div>
+                <div className="glass-panel p-5 rounded-[1.5rem] group hover:scale-[1.02] transition-all duration-300">
                     <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Status</p>
                     <div className="flex items-center gap-2">
                         <span className={`text-xl md:text-2xl font-extrabold tracking-tight ${stats.overBudgetCount > 0 ? 'text-rose-500 dark:text-rose-400' : 'text-emerald-500 dark:text-emerald-400'}`}>
                             {stats.overBudgetCount > 0 ? `${stats.overBudgetCount} Over` : 'Aman'}
                         </span>
-                        {stats.overBudgetCount === 0 && <span className="text-emerald-500">✨</span>}
+                        {stats.overBudgetCount === 0 && <span className="text-emerald-500 animate-pulse">✨</span>}
                     </div>
                 </div>
             </div>
@@ -261,7 +266,7 @@ const BudgetsPage: React.FC = () => {
                     placeholder="Cari kategori anggaran..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full h-14 pl-12 pr-4 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary/50 focus:border-primary text-base font-medium transition-all shadow-sm"
+                    className="w-full h-14 pl-12 pr-4 rounded-2xl bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border border-gray-200/50 dark:border-white/10 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary/50 focus:border-primary text-base font-medium transition-all shadow-sm hover:bg-white dark:hover:bg-gray-800"
                 />
             </div>
 
@@ -278,7 +283,7 @@ const BudgetsPage: React.FC = () => {
                         return (
                             <div
                                 key={budget.id}
-                                className="relative overflow-hidden p-6 rounded-[24px] bg-white dark:bg-gray-800 border border-gray-100 dark:border-white/5 shadow-sm hover:shadow-lg hover:shadow-primary/5 hover:border-primary/20 dark:hover:border-primary/20 transition-all duration-300 group"
+                                className="glass-panel relative overflow-hidden p-6 rounded-[24px] hover:scale-[1.01] transition-all duration-300 group"
                             >
                                 <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 dark:opacity-[0.02] dark:group-hover:opacity-5 transition-opacity pointer-events-none transform scale-150 origin-top-right">
                                     <div className={`w-32 h-32 rounded-full bg-current ${baseColorClass}`} />

@@ -66,17 +66,17 @@ const AIChatPage: React.FC = () => {
             {/* Header */}
             <div className="flex items-center justify-between mb-4 px-4 md:px-0">
                 <div className="flex items-center gap-3">
-                    <div className="p-2 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-xl shadow-lg shadow-indigo-500/20">
+                    <div className="p-3 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-2xl shadow-lg shadow-indigo-500/30 ring-1 ring-white/20">
                         <SparklesIcon className="w-6 h-6 text-white" />
                     </div>
                     <div>
-                        <h1 className="text-xl font-bold text-gray-900 dark:text-white">Dompet AI</h1>
-                        <p className="text-xs text-gray-500">Asisten Keuangan Pribadi</p>
+                        <h1 className="text-xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300">Dompet AI</h1>
+                        <p className="text-xs font-medium text-indigo-500 dark:text-indigo-400 tracking-wide">Asisten Keuangan Pribadi</p>
                     </div>
                 </div>
                 <button
                     onClick={() => resetChat()}
-                    className="p-2 text-gray-400 hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors"
+                    className="p-3 text-gray-400 hover:text-indigo-500 hover:bg-white dark:hover:bg-gray-800 rounded-2xl transition-all hover:shadow-md border border-transparent hover:border-gray-100 dark:hover:border-white/10"
                     title="Reset Chat"
                 >
                     <RefreshIcon className="w-5 h-5" />
@@ -86,23 +86,25 @@ const AIChatPage: React.FC = () => {
             {/* Chat Area */}
             <div
                 ref={chatContainerRef}
-                className="flex-1 overflow-y-auto space-y-6 p-4 rounded-[32px] bg-gray-50 dark:bg-black/20 border border-gray-100 dark:border-white/5 shadow-inner mb-4 custom-scrollbar"
+                className="flex-1 overflow-y-auto space-y-6 p-4 rounded-[32px] bg-white/40 dark:bg-black/20 border border-white/50 dark:border-white/5 shadow-inner mb-4 custom-scrollbar backdrop-blur-sm"
             >
                 {messages.length === 0 && !isLoading && !error && (
-                    <div className="flex flex-col items-center justify-center h-full text-center opacity-60">
-                        <div className="w-20 h-20 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-3xl flex items-center justify-center mb-6 animate-float">
-                            <SparklesIcon className="w-10 h-10 text-indigo-500 dark:text-indigo-400" />
+                    <div className="flex flex-col items-center justify-center h-full text-center">
+                        <div className="glass-panel p-8 rounded-[2rem] max-w-sm mx-auto">
+                            <div className="w-20 h-20 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-full flex items-center justify-center mb-6 animate-float mx-auto">
+                                <SparklesIcon className="w-10 h-10 text-indigo-500 dark:text-indigo-400" />
+                            </div>
+                            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">Dompet AI</h3>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed mb-6">
+                                Halo! 👋 Saya siap membantu Anda mengelola keuangan, mencatat transaksi, atau memberikan saran finansial.
+                            </p>
+                            <button
+                                onClick={() => resetChat()}
+                                className="px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-2xl text-sm font-bold shadow-lg shadow-indigo-500/30 hover:scale-105 transition-all"
+                            >
+                                Mulai Percakapan
+                            </button>
                         </div>
-                        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Dompet AI</h3>
-                        <p className="text-sm text-gray-500 max-w-xs mx-auto">
-                            Tanyakan tentang pengeluaran, buat anggaran, atau minta saran keuangan.
-                        </p>
-                        <button
-                            onClick={() => resetChat()}
-                            className="mt-4 px-4 py-2 bg-indigo-50 text-indigo-600 rounded-full text-sm font-medium hover:bg-indigo-100 transition-colors"
-                        >
-                            Mulai Percakapan
-                        </button>
                     </div>
                 )}
 
@@ -113,16 +115,16 @@ const AIChatPage: React.FC = () => {
                     >
                         <div
                             className={`
-                                max-w-[85%] md:max-w-[75%] p-4 text-sm leading-relaxed shadow-sm relative group
+                                max-w-[85%] md:max-w-[75%] p-5 text-sm leading-relaxed shadow-sm relative group transition-all duration-300
                                 ${msg.sender === 'user'
-                                    ? 'bg-gradient-to-br from-primary to-indigo-600 text-white rounded-[24px] rounded-br-[4px]'
-                                    : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-[24px] rounded-bl-[4px] border border-gray-100 dark:border-white/5'
+                                    ? 'bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-[2rem] rounded-br-[4px] shadow-indigo-500/20 hover:shadow-indigo-500/30'
+                                    : 'glass-panel text-gray-900 dark:text-gray-100 rounded-[2rem] rounded-bl-[4px]'
                                 }
                             `}
                         >
                             {msg.sender === 'ai' && (
-                                <div className="absolute -left-10 top-0 w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 text-xs font-bold border border-indigo-200 dark:border-indigo-800">
-                                    AI
+                                <div className="absolute -left-12 top-0 w-10 h-10 rounded-2xl bg-gradient-to-br from-white to-gray-100 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center text-indigo-500 text-xs font-bold border border-white/20 shadow-sm">
+                                    <SparklesIcon className="w-5 h-5" />
                                 </div>
                             )}
 
@@ -130,11 +132,11 @@ const AIChatPage: React.FC = () => {
                                 <ReactMarkdown
                                     components={{
                                         p: ({ ...props }) => <p className="mb-2 last:mb-0" {...props} />,
-                                        ul: ({ ...props }) => <ul className="list-disc ml-4 mb-2 space-y-1" {...props} />,
+                                        ul: ({ ...props }) => <ul className="list-disc ml-4 mb-2 space-y-1 marker:text-indigo-500" {...props} />,
                                         li: ({ ...props }) => <li className="mb-1" {...props} />,
                                         strong: ({ ...props }) => <strong className="font-bold text-indigo-600 dark:text-indigo-400" {...props} />,
                                         h3: ({ ...props }) => <h3 className="text-lg font-bold mt-4 mb-2" {...props} />,
-                                        code: ({ ...props }) => <code className="bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded text-xs font-mono" {...props} />,
+                                        code: ({ ...props }) => <code className="bg-gray-100/50 dark:bg-black/30 px-1.5 py-0.5 rounded text-xs font-mono text-indigo-600 dark:text-indigo-300 border border-black/5 dark:border-white/10" {...props} />,
                                     }}
                                 >
                                     {msg.text}
@@ -144,7 +146,7 @@ const AIChatPage: React.FC = () => {
                             )}
 
                             {msg.chartData && (
-                                <div className="mt-4 bg-gray-50 dark:bg-gray-900/50 rounded-2xl p-4 border border-gray-100 dark:border-white/5">
+                                <div className="mt-4 bg-white/50 dark:bg-black/20 rounded-2xl p-4 border border-white/20 backdrop-blur-sm">
                                     <AIChartWidget
                                         type={msg.chartData.type}
                                         data={msg.chartData.data}
@@ -157,17 +159,17 @@ const AIChatPage: React.FC = () => {
                 ))}
 
                 {isLoading && (
-                    <div className="flex justify-start pl-12">
-                        <div className="bg-white dark:bg-gray-800 rounded-[24px] rounded-bl-[4px] p-4 border border-gray-100 dark:border-white/5 shadow-sm flex gap-2 items-center">
-                            <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                            <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                            <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                    <div className="flex justify-start pl-14">
+                        <div className="glass-panel rounded-[2rem] rounded-bl-[4px] p-4 flex gap-2 items-center">
+                            <div className="w-2.5 h-2.5 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                            <div className="w-2.5 h-2.5 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                            <div className="w-2.5 h-2.5 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                         </div>
                     </div>
                 )}
 
                 {error && (
-                    <div className="p-4 bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 rounded-2xl text-center text-sm border border-rose-100 dark:border-rose-800 animate-shake">
+                    <div className="p-4 bg-rose-50/50 dark:bg-rose-900/10 text-rose-600 dark:text-rose-400 rounded-2xl text-center text-sm border border-rose-100/50 dark:border-rose-800/20 animate-shake backdrop-blur-sm">
                         {error}
                         <button onClick={() => resetChat()} className="block mx-auto mt-2 font-bold hover:underline">Coba lagi</button>
                     </div>
@@ -183,12 +185,12 @@ const AIChatPage: React.FC = () => {
                         onChange={(e) => setUserInput(e.target.value)}
                         placeholder="Ketik pesan Anda..."
                         disabled={isLoading || !!pendingAction}
-                        className="w-full h-14 pl-6 pr-16 rounded-[24px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary/50 focus:border-primary shadow-lg shadow-gray-100/50 dark:shadow-none disabled:opacity-60 disabled:cursor-not-allowed text-base font-medium transition-all"
+                        className="w-full h-14 pl-6 pr-16 rounded-[24px] bg-white/70 dark:bg-gray-800/70 border border-gray-200/50 dark:border-white/10 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 shadow-lg shadow-indigo-500/5 dark:shadow-none disabled:opacity-60 disabled:cursor-not-allowed text-base font-medium transition-all backdrop-blur-md hover:bg-white dark:hover:bg-gray-800"
                     />
                     <button
                         type="submit"
                         disabled={!userInput.trim() || isLoading || !!pendingAction}
-                        className="absolute right-2 top-2 h-10 w-10 flex items-center justify-center bg-gradient-to-r from-primary to-indigo-600 hover:from-primary-dark hover:to-indigo-700 text-white rounded-[18px] transition-all disabled:opacity-50 disabled:scale-100 active:scale-95 shadow-md shadow-primary/20"
+                        className="absolute right-2 top-2 h-10 w-10 flex items-center justify-center bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-[20px] transition-all disabled:opacity-50 disabled:scale-100 active:scale-95 shadow-md shadow-indigo-500/20 transform hover:-rotate-12"
                     >
                         <PaperAirplaneIcon className="w-5 h-5 pointer-events-none" />
                     </button>

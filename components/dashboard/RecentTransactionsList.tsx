@@ -63,7 +63,7 @@ const RecentTransactionsList: React.FC<RecentTransactionsListProps> = ({
     };
 
     return (
-        <div className="p-4 rounded-2xl bg-white dark:bg-gray-800/80 backdrop-blur-sm border border-gray-100 dark:border-gray-700/50 shadow-sm overflow-hidden">
+        <div className="glass-panel p-4 rounded-2xl shadow-sm overflow-hidden">
             {/* Header with "Lihat Semua" link - Requirement 5.4 */}
             <div className="flex justify-between items-center mb-3 gap-2">
                 <h3 className="font-bold text-gray-900 dark:text-white flex items-center gap-2 text-sm">

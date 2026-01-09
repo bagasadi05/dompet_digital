@@ -13,6 +13,8 @@ const TrendingUpIcon: React.FC<{ className?: string }> = ({ className }) => (
     </svg>
 );
 
+import CountUp from '../common/CountUp';
+
 const TrendingDownIcon: React.FC<{ className?: string }> = ({ className }) => (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6 9 12.75l4.286-4.286a11.948 11.948 0 0 1 4.306 6.43l.776 2.898m0 0 3.182-5.511m-3.182 5.51-5.511-3.181" />
@@ -84,15 +86,14 @@ const FinancialCard: React.FC<FinancialCardProps> = ({
         <div
             className={`
                 relative overflow-hidden group
-                bg-white dark:bg-gray-800/80 backdrop-blur-sm
-                rounded-[1.5rem] p-6 shadow-sm
-                border border-white/5
-                hover:shadow-lg transition-all duration-300
+                glass-panel
+                rounded-[1.5rem] p-6 hover:shadow-md
+                hover:-translate-y-1 transition-all duration-300
             `}
         >
             {/* Decorative blur element */}
             <div className="absolute right-0 top-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl opacity-60 -mr-8 -mt-8 pointer-events-none"></div>
-            
+
             <div className="flex items-start justify-between mb-3 relative z-10">
                 {/* Icon - Requirement 3.1, 3.2, 3.3 */}
                 <div className={`w-11 h-11 rounded-2xl ${styles.iconBg} flex items-center justify-center ${styles.iconColor} border ${styles.border}`}>
@@ -103,8 +104,8 @@ const FinancialCard: React.FC<FinancialCardProps> = ({
                 {trend && (
                     <span className={`
                         px-2 py-0.5 rounded-md text-[11px] font-bold
-                        ${trend.direction === 'up' 
-                            ? 'bg-emerald-500/10 text-emerald-400' 
+                        ${trend.direction === 'up'
+                            ? 'bg-emerald-500/10 text-emerald-400'
                             : 'bg-rose-500/10 text-rose-400'
                         }
                     `}>
@@ -118,7 +119,7 @@ const FinancialCard: React.FC<FinancialCardProps> = ({
                     {title}
                 </p>
                 <h3 className={`${amountSizeClass} font-extrabold text-gray-100 tracking-tight`}>
-                    {formatCurrency(amount)}
+                    <CountUp end={amount} formattingFn={formatCurrency} duration={2500} />
                 </h3>
             </div>
         </div>
