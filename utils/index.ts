@@ -1,6 +1,7 @@
 /**
  * Centralized utility functions for the Dompet Digital app
  */
+import { Transaction } from '../services/types';
 
 // Currency formatting
 export const formatCurrency = (amount: number): string => {
@@ -113,6 +114,32 @@ export const getCategoryGradient = (category: string): string => {
         'Lainnya': 'from-gray-400 to-gray-600',
     };
     return gradientMap[category] || 'from-gray-400 to-gray-600';
+};
+
+// Bill payment helpers
+/**
+ * Calculates a map of paid amounts for bill cycles from a list of transactions.
+ * This is an optimization to prevent re-calculating this for each bill.
+ * @param transactions - A list of all transactions.
+ * @returns A Map where the key is "billId-YYYY-MM-DDTHH:mm:ss.sssZ" and value is the total paid amount.
+ */
+export const calculatePaidAmounts = (transactions: Transaction[]): Map<string, number> => {
+    const paidAmounts = new Map<string, number>();
+    // Regex to find a date in ISO format (like 2024-07-29T17:00:00.000Z) inside parentheses
+    const cycleTagRegex = /\((\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z)\)/;
+
+    for (const t of transactions) {
+        if (t.billId) {
+            const match = t.description.match(cycleTagRegex);
+            if (match && match[1]) {
+                const cycleTag = match[1]; // This is the nextDueDate string
+                const key = `${t.billId}-${cycleTag}`;
+                const currentAmount = paidAmounts.get(key) || 0;
+                paidAmounts.set(key, currentAmount + t.amount);
+            }
+        }
+    }
+    return paidAmounts;
 };
 
 // Validation helpers
