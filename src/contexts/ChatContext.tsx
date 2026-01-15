@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useRef } from 'react';
+import React, { createContext, useContext, useState, useCallback } from 'react';
 import { useData } from './DataContext';
 import { ChatSession, startChatSession, sendMessageToAI, sendToolResult, AIStreamResult } from '../services/aiChatService';
 import { AIAction, mapCategory, mapTransactionType } from '../services/aiActionTypes';
@@ -43,7 +43,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const {
         transactions, budgets, goals, bills,
         addTransaction, updateTransaction, deleteTransaction,
-        addBudget, addGoal, deleteGoal,
+        addBudget, addGoal,
         addBill, updateBill, deleteBill, payBill,
         refreshData
     } = useData();
