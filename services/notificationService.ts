@@ -1,14 +1,6 @@
 import { LocalNotifications } from '@capacitor/local-notifications';
 import { Bill, AppNotification, Budget, Goal, Transaction, TransactionType } from './types';
-import { formatCurrency } from '../utils';
-
-// Helper to calculate paid amount for the *current* billing cycle
-const getPaidAmount = (bill: Bill, transactions: Transaction[]): number => {
-    const cycleTag = `(${bill.nextDueDate})`;
-    return transactions
-        .filter(t => t.billId === bill.id && t.description.includes(cycleTag))
-        .reduce((sum, t) => sum + t.amount, 0);
-};
+import { formatCurrency, calculatePaidAmounts } from '../utils';
 
 export const generateNotifications = (
     bills: Bill[],
@@ -20,12 +12,15 @@ export const generateNotifications = (
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
+    // Pre-calculate paid amounts for efficiency
+    const paidAmounts = calculatePaidAmounts(transactions);
+
     // 1. Bill Due Dates
     bills.forEach(bill => {
         const dueDate = new Date(bill.nextDueDate);
         dueDate.setHours(0, 0, 0, 0);
-        
-        const paidAmount = getPaidAmount(bill, transactions);
+
+        const paidAmount = paidAmounts.get(`${bill.id}-${bill.nextDueDate}`) || 0;
         const isPaid = paidAmount >= bill.amount - 1; // Tolerance
 
         if (!isPaid) {

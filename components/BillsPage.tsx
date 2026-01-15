@@ -6,18 +6,8 @@ import CurrencyInput from './common/CurrencyInput';
 import ConfirmDialog from './common/ConfirmDialog';
 import { PlusIcon, PencilIcon, TrashIcon, CreditCardIcon, CheckCircleIcon, SearchIcon, CalendarIcon } from './common/Icons';
 import { useData } from '../contexts/DataContext';
-import { formatCurrency, formatDate } from '../utils';
+import { formatCurrency, formatDate, calculatePaidAmounts } from '../utils';
 import { NotificationService } from '../services/notificationService';
-
-// Helper to calculate paid amount for the *current* billing cycle
-const getPaidAmount = (bill: Bill, transactions: Transaction[]): number => {
-    // We link transactions to a specific bill cycle by checking if the description contains the due date.
-    // This is a robust way to avoid counting payments for previous/future cycles.
-    const cycleTag = `(${bill.nextDueDate})`;
-    return transactions
-        .filter(t => t.billId === bill.id && t.description.includes(cycleTag))
-        .reduce((sum, t) => sum + t.amount, 0);
-};
 
 const getDaysUntilDue = (nextDueDate: string, paidAmount: number, totalAmount: number): { days: number; text: string; urgency: 'overdue' | 'urgent' | 'soon' | 'ok' | 'paid' } => {
     // Tolerance for float precision
@@ -262,6 +252,9 @@ const BillsPage: React.FC = () => {
     // Search
     const [searchQuery, setSearchQuery] = useState('');
 
+    // Pre-calculate all paid amounts for all bills in one go.
+    const paidAmountsMap = useMemo(() => calculatePaidAmounts(transactions), [transactions]);
+
     const sortedBills = useMemo(() => {
         return [...bills].sort((a, b) => new Date(a.nextDueDate).getTime() - new Date(b.nextDueDate).getTime());
     }, [bills]);
@@ -274,26 +267,20 @@ const BillsPage: React.FC = () => {
     }, [sortedBills, searchQuery]);
 
     const stats = useMemo(() => {
-        // Removed unused totalAmount calculation
-        // Calculate total unpaid amount considering partial payments
         let totalUnpaid = 0;
-        bills.forEach(b => {
-            const paid = getPaidAmount(b, transactions);
-            totalUnpaid += Math.max(0, b.amount - paid);
-        });
+        let urgentCount = 0;
+        let overdueCount = 0;
 
-        const urgentCount = bills.filter(b => {
-            const paid = getPaidAmount(b, transactions);
-            return getDaysUntilDue(b.nextDueDate, paid, b.amount).urgency === 'urgent';
-        }).length;
-
-        const overdueCount = bills.filter(b => {
-            const paid = getPaidAmount(b, transactions);
-            return getDaysUntilDue(b.nextDueDate, paid, b.amount).urgency === 'overdue';
-        }).length;
+        for (const bill of bills) {
+            const paid = paidAmountsMap.get(`${bill.id}-${bill.nextDueDate}`) || 0;
+            totalUnpaid += Math.max(0, bill.amount - paid);
+            const dueInfo = getDaysUntilDue(bill.nextDueDate, paid, bill.amount);
+            if (dueInfo.urgency === 'urgent') urgentCount++;
+            if (dueInfo.urgency === 'overdue') overdueCount++;
+        }
 
         return { totalAmount: totalUnpaid, urgentCount, overdueCount, totalCount: bills.length };
-    }, [bills, transactions]);
+    }, [bills, paidAmountsMap]);
 
     const handleSubmit = async (data: Omit<Bill, 'id'> & { id?: string }) => {
         if (data.id) {
@@ -346,7 +333,7 @@ const BillsPage: React.FC = () => {
         setIsPayLoading(true);
         try {
             const totalBillAmount = paymentBill.amount;
-            const currentlyPaid = getPaidAmount(paymentBill, transactions);
+            const currentlyPaid = paidAmountsMap.get(`${paymentBill.id}-${paymentBill.nextDueDate}`) || 0;
             const remaining = totalBillAmount - currentlyPaid;
 
             // Cap the amount to remaining just in case
@@ -473,7 +460,7 @@ const BillsPage: React.FC = () => {
             {filteredBills.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {filteredBills.map(bill => {
-                        const paidAmount = getPaidAmount(bill, transactions);
+                        const paidAmount = paidAmountsMap.get(`${bill.id}-${bill.nextDueDate}`) || 0;
                         const dueInfo = getDaysUntilDue(bill.nextDueDate, paidAmount, bill.amount);
                         const styles = getUrgencyStyles(dueInfo.urgency);
                         const progress = bill.amount > 0 ? Math.min(100, (paidAmount / bill.amount) * 100) : 0;
@@ -593,7 +580,7 @@ const BillsPage: React.FC = () => {
                 {paymentBill && (
                     <PaymentModal
                         bill={paymentBill}
-                        remainingAmount={paymentBill.amount - getPaidAmount(paymentBill, transactions)}
+                        remainingAmount={paymentBill.amount - (paidAmountsMap.get(`${paymentBill.id}-${paymentBill.nextDueDate}`) || 0)}
                         onClose={() => setPaymentBill(null)}
                         onConfirm={handlePaymentConfirm}
                         isLoading={isPayLoading}
