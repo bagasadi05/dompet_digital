@@ -78,6 +78,7 @@ const AIChatPage: React.FC = () => {
                     onClick={() => resetChat()}
                     className="p-3 text-gray-400 hover:text-indigo-500 hover:bg-white dark:hover:bg-gray-800 rounded-2xl transition-all hover:shadow-md border border-transparent hover:border-gray-100 dark:hover:border-white/10"
                     title="Reset Chat"
+                    aria-label="Reset Percakapan"
                 >
                     <RefreshIcon className="w-5 h-5" />
                 </button>
@@ -191,6 +192,7 @@ const AIChatPage: React.FC = () => {
                         type="submit"
                         disabled={!userInput.trim() || isLoading || !!pendingAction}
                         className="absolute right-2 top-2 h-10 w-10 flex items-center justify-center bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-[20px] transition-all disabled:opacity-50 disabled:scale-100 active:scale-95 shadow-md shadow-indigo-500/20 transform hover:-rotate-12"
+                        aria-label="Kirim Pesan"
                     >
                         <PaperAirplaneIcon className="w-5 h-5 pointer-events-none" />
                     </button>

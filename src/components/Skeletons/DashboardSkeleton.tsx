@@ -1,70 +1,57 @@
 import React from 'react';
-import Card from '../common/Card';
-import Skeleton from '../common/Skeleton';
+import { SkeletonCard } from './SkeletonLoader';
 
 const DashboardSkeleton: React.FC = () => {
   return (
     <div className="space-y-6">
-      {/* Greeting Card Skeleton */}
-      <Card className="bg-gradient-to-br from-primary-dark to-primary-light dark:from-dark-card dark:to-gray-800 text-white shadow-lg">
-        <div className="p-2">
-          <Skeleton className="h-8 w-3/4 mb-2 bg-white/30" />
-          <Skeleton className="h-4 w-1/2 bg-white/30" />
-          <div className="mt-4 p-3 bg-white/10 rounded-lg">
-            <Skeleton className="h-10 w-full bg-white/20" />
-          </div>
-        </div>
-      </Card>
+      {/* Welcome Card Skeleton */}
+      <SkeletonCard type="welcome" />
 
-      {/* Filter Buttons Skeleton */}
-      <div className="flex justify-center bg-light-card dark:bg-dark-card p-1 rounded-lg shadow-sm space-x-2">
-        <Skeleton className="h-8 flex-1 rounded-md" />
-        <Skeleton className="h-8 flex-1 rounded-md" />
-        <Skeleton className="h-8 flex-1 rounded-md" />
+      {/* Financial Score Skeleton - Matching the new widget */}
+      <div className="p-6 rounded-3xl bg-white dark:bg-gray-800/80 border border-gray-100 dark:border-gray-700/50 backdrop-blur-sm shadow-sm flex items-center justify-between">
+         <div className="space-y-2">
+             <div className="h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></div>
+             <div className="h-8 w-24 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></div>
+         </div>
+         <div className="w-16 h-16 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
       </div>
 
       {/* Summary Cards Skeleton */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {[...Array(4)].map((_, i) => (
-          <Card key={i} className="p-4">
-            <div className="flex items-center mb-2">
-              <Skeleton className="w-10 h-10 rounded-lg mr-3" />
-              <Skeleton className="h-4 w-20" />
-            </div>
-            <Skeleton className="h-8 w-3/4" />
-          </Card>
-        ))}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <SkeletonCard type="balance" />
+        <SkeletonCard type="income-expense" />
+        {/* Hidden on mobile usually, but shown on larger screens */}
+        <div className="hidden lg:block">
+             <SkeletonCard type="income-expense" />
+        </div>
       </div>
 
-      {/* List Card Skeleton */}
-      <Card>
-        <div className="flex justify-between items-center mb-4">
-          <Skeleton className="h-6 w-1/3" />
-          <Skeleton className="h-4 w-20" />
-        </div>
-        <div className="space-y-4">
-          {[...Array(3)].map((_, i) => (
-            <div key={i} className="flex justify-between items-center">
-              <div>
-                <Skeleton className="h-5 w-40 mb-2" />
-                <Skeleton className="h-4 w-24" />
-              </div>
-              <Skeleton className="h-6 w-20" />
-            </div>
-          ))}
-        </div>
-      </Card>
+      {/* Quick Actions Skeleton */}
+      <SkeletonCard type="quick-actions" />
 
-      {/* Another List Card Skeleton */}
-      <Card>
-        <div className="flex justify-between items-center mb-4">
-          <Skeleton className="h-6 w-1/3" />
-          <Skeleton className="h-4 w-20" />
+      {/* Two Column Layout Skeleton */}
+      <div className="grid md:grid-cols-2 gap-5">
+        {/* Chart Skeleton */}
+        <div className="p-5 rounded-2xl bg-white dark:bg-gray-800/80 backdrop-blur-sm shadow-sm border border-gray-100 dark:border-gray-700/50 h-[300px] flex flex-col">
+            <div className="flex justify-between mb-4">
+                <div className="h-6 w-40 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></div>
+                <div className="h-4 w-12 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></div>
+            </div>
+            <div className="flex-1 flex items-center justify-center">
+                <div className="w-40 h-40 rounded-full border-8 border-gray-200 dark:border-gray-700 animate-pulse"></div>
+            </div>
         </div>
-        <div className="space-y-4">
-           <Skeleton className="h-20 w-full" />
-        </div>
-      </Card>
+
+        {/* Recent Transactions Skeleton */}
+        <SkeletonCard type="transaction" />
+      </div>
+
+      {/* Second Row Skeleton */}
+      <div className="grid md:grid-cols-2 gap-5">
+        <SkeletonCard type="goal" />
+        {/* Upcoming Bills Skeleton */}
+        <SkeletonCard type="transaction" />
+      </div>
     </div>
   );
 };
