@@ -71,6 +71,7 @@ const getTransactions = async (userId: string): Promise<Transaction[]> => {
 const addTransaction = async (tx: Omit<Transaction, 'id'> & { user_id: string }): Promise<Transaction | null> => {
     // Explicitly destructure id to ensure it's NOT included in restOfTx (even if passed as "" or undefined)
     // @ts-expect-error - id might exist in runtime even if Omit says no
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { id: _id, goalId, billId, ...restOfTx } = tx;
 
     // Convert empty strings to null for UUID fields

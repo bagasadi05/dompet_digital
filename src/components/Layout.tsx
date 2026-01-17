@@ -123,28 +123,7 @@ const Layout: React.FC<LayoutProps> = ({ theme, toggleTheme, children }) => {
   const location = useLocation();
   const title = pageTitles[location.pathname] || 'Dompet Digital';
   const { notifications, markAsRead, markAllAsRead } = useData();
-  // const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-
-  /*
-  const handleVoiceResult = async (result: ParsedTransaction) => {
-    if (result.success && result.amount && result.description && result.type) {
-      try {
-        await addTransaction({
-          type: result.type === 'pemasukan' ? TransactionType.INCOME : TransactionType.EXPENSE,
-          amount: result.amount,
-          category: (result.category as Category) || Category.LAINNYA,
-          description: result.description,
-          date: new Date().toISOString()
-        });
-        // Optional: Show success toast or notification? 
-        // addTransaction usually handles data update.
-      } catch (error) {
-        console.error('Failed to add voice transaction', error);
-      }
-    }
-  };
-  */
 
   return (
     /* Premium Dark Mode Background - #0A0F1A */
@@ -210,8 +189,6 @@ const Layout: React.FC<LayoutProps> = ({ theme, toggleTheme, children }) => {
         <BottomNav />
       </div>
 
-      {/* Voice Input Modal */}
-      {/* Voice Input Modal Removed */}
     </div>
   );
 };

@@ -33,6 +33,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     console.error('ErrorBoundary caught an error:', error, errorInfo);
     
     // Call optional error handler
@@ -65,6 +66,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
  * 
  * Provides a user-friendly error display with retry functionality
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const DefaultErrorFallback: React.FC<ErrorFallbackProps> = ({ error, resetError }) => {
   const isDevelopment = process.env.NODE_ENV === 'development';
 

@@ -23,10 +23,8 @@ import { exportTransactionsToPDF } from '../utils/exportUtils';
 import { formatCurrency, formatDate, getCategoryEmoji, getCategoryColor } from '../utils';
 import ReceiptScanner from './ReceiptScanner';
 import { ReceiptScanResult } from '../services/receiptScanService';
-// import VoiceInputModal from './VoiceInputModal';
-// import { ParsedTransaction } from '../services/voiceParserService';
+import { TransactionsEmptyState } from './common/EmptyState';
 
-// Form Component
 // Form Component
 interface TransactionFormProps {
     onSubmit: (data: Omit<Transaction, 'id'> & { id?: string }) => void;
@@ -280,7 +278,6 @@ const TransactionsPage: React.FC<TransactionsPageProps> = ({ isSimplified, onClo
     const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
     const [deleteConfirm, setDeleteConfirm] = useState<Transaction | null>(null);
     const [isScannerOpen, setIsScannerOpen] = useState(false);
-    // const [isVoiceOpen, setIsVoiceOpen] = useState(false);
 
     // Filter States
     const [typeFilter, setTypeFilter] = useState<'all' | TransactionType>('all');
@@ -353,27 +350,6 @@ const TransactionsPage: React.FC<TransactionsPageProps> = ({ isSimplified, onClo
             });
         }
     };
-
-    /*
-    const handleVoiceResult = (result: ParsedTransaction) => {
-        if (result.success) {
-            setEditingTransaction({
-                id: '',
-                type: result.type === 'pemasukan' ? TransactionType.INCOME : TransactionType.EXPENSE,
-                amount: result.amount || 0,
-                category: (result.category as Category) || Category.LAINNYA,
-                description: result.description || 'Transaksi via suara',
-                date: new Date().toISOString(),
-            } as Transaction);
-            setIsModalOpen(true);
-            showToast({
-                type: 'success',
-                title: 'Suara Berhasil Diproses',
-                message: result.description || 'Transaksi terdeteksi'
-            });
-        }
-    };
-    */
 
     // Filtered & Paginated Transactions
     const filteredTransactions = useMemo(() => {
@@ -475,11 +451,11 @@ const TransactionsPage: React.FC<TransactionsPageProps> = ({ isSimplified, onClo
                         <CameraIcon className="w-5 h-5 drop-shadow-sm" />
                         <span>Scan Struk</span>
                     </button>
-                    {/* Voice Button Removed */}
                     <button
                         onClick={() => setIsModalOpen(true)}
                         className="h-12 px-5 flex items-center gap-2 text-white rounded-2xl font-bold text-sm transition-all shadow-lg shadow-primary/30 active:scale-95 border border-white/20"
                         style={{ background: 'linear-gradient(to right, #00D09C, #34D399)' }}
+                        aria-label="Tambah Transaksi Baru"
                     >
                         <PlusIcon className="w-5 h-5 drop-shadow-sm" />
                         <span>Tambah</span>
@@ -490,6 +466,7 @@ const TransactionsPage: React.FC<TransactionsPageProps> = ({ isSimplified, onClo
                     <button
                         onClick={handleExport}
                         className="h-12 flex-1 flex items-center justify-center gap-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-2xl font-bold text-sm transition-all active:scale-95 shadow-sm"
+                        aria-label="Ekspor Transaksi ke PDF"
                     >
                         <DownloadIcon className="w-5 h-5" />
                     </button>
@@ -497,10 +474,10 @@ const TransactionsPage: React.FC<TransactionsPageProps> = ({ isSimplified, onClo
                         onClick={() => setIsScannerOpen(true)}
                         className="h-12 flex-1 flex items-center justify-center gap-2 text-white rounded-2xl font-bold text-sm transition-all active:scale-95 shadow-md border border-white/20"
                         style={{ background: 'linear-gradient(to right, #8B5CF6, #D946EF)' }}
+                        aria-label="Scan Struk Transaksi"
                     >
                         <CameraIcon className="w-6 h-6 drop-shadow-sm" />
                     </button>
-                    {/* Mobile Voice Button Removed */}
                 </div>
             </div>
 
@@ -509,6 +486,7 @@ const TransactionsPage: React.FC<TransactionsPageProps> = ({ isSimplified, onClo
                 onClick={() => setIsModalOpen(true)}
                 className="md:hidden fixed bottom-28 right-4 z-30 h-14 w-14 flex items-center justify-center rounded-2xl text-white shadow-xl shadow-primary/40 active:scale-95 transition-all border border-white/20"
                 style={{ background: 'linear-gradient(to br, #00D09C, #34D399)' }}
+                aria-label="Tambah Transaksi Floating Button"
             >
                 <PlusIcon className="w-7 h-7 drop-shadow-sm" />
             </button>
@@ -560,6 +538,7 @@ const TransactionsPage: React.FC<TransactionsPageProps> = ({ isSimplified, onClo
                                 value={typeFilter}
                                 onChange={(e) => setTypeFilter(e.target.value as TransactionType | 'all')}
                                 className="w-full h-12 pl-4 pr-10 rounded-2xl bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border border-gray-200/50 dark:border-white/10 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm font-medium appearance-none cursor-pointer shadow-sm hover:bg-white dark:hover:bg-gray-800 transition-colors"
+                                aria-label="Filter berdasarkan tipe transaksi"
                             >
                                 <option value="all">Semua Tipe</option>
                                 <option value={TransactionType.INCOME}>Pemasukan</option>
@@ -574,6 +553,7 @@ const TransactionsPage: React.FC<TransactionsPageProps> = ({ isSimplified, onClo
                                 value={categoryFilter}
                                 onChange={(e) => setCategoryFilter(e.target.value)}
                                 className="w-full h-12 pl-4 pr-10 rounded-2xl bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border border-gray-200/50 dark:border-white/10 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm font-medium appearance-none cursor-pointer shadow-sm hover:bg-white dark:hover:bg-gray-800 transition-colors"
+                                aria-label="Filter berdasarkan kategori"
                             >
                                 <option value="all">Semua Kategori</option>
                                 {uniqueCategories.map(cat => (
@@ -587,6 +567,7 @@ const TransactionsPage: React.FC<TransactionsPageProps> = ({ isSimplified, onClo
                         onClick={() => refreshData()}
                         className="h-12 w-12 flex-none flex items-center justify-center bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border border-gray-200/50 dark:border-white/10 rounded-2xl hover:bg-white dark:hover:bg-gray-800 text-gray-500 hover:text-primary transition-all shadow-sm active:scale-95"
                         title="Refresh Data"
+                        aria-label="Refresh Data"
                     >
                         <RefreshIcon className="w-5 h-5" />
                     </button>
@@ -594,6 +575,7 @@ const TransactionsPage: React.FC<TransactionsPageProps> = ({ isSimplified, onClo
                         <button
                             onClick={resetFilters}
                             className="h-12 px-5 flex-none text-sm font-bold text-rose-500 bg-rose-50 dark:bg-rose-900/10 hover:bg-rose-100 dark:hover:bg-rose-900/20 rounded-2xl transition-colors whitespace-nowrap border border-rose-100 dark:border-rose-900/20"
+                            aria-label="Reset Filter"
                         >
                             Reset
                         </button>
@@ -715,14 +697,8 @@ const TransactionsPage: React.FC<TransactionsPageProps> = ({ isSimplified, onClo
                         </div>
                     </div>
                 ) : (
-                    <div className="p-12 text-center flex flex-col items-center justify-center min-h-[300px]">
-                        <div className="w-20 h-20 rounded-full bg-gray-50 dark:bg-gray-700/30 flex items-center justify-center text-4xl mb-4 animate-bounce-slow">
-                            📝
-                        </div>
-                        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Belum ada transaksi</h3>
-                        <p className="text-gray-500 dark:text-gray-400 max-w-xs mx-auto">
-                            Mulai catat pengeluaran dan pemasukan Anda untuk memantau arus kas dengan lebih baik.
-                        </p>
+                    <div className="flex flex-col items-center justify-center min-h-[400px]">
+                        <TransactionsEmptyState onAddTransaction={() => setIsModalOpen(true)} />
                     </div>
                 )}
             </div>
@@ -784,8 +760,6 @@ const TransactionsPage: React.FC<TransactionsPageProps> = ({ isSimplified, onClo
                 />
             )}
 
-            {/* Voice Input Modal */}
-            {/* VoiceInputModal Removed */}
         </div>
     );
 };
