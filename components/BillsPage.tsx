@@ -23,12 +23,9 @@ const getPaidAmount = (bill: Bill, transactions: Transaction[]): number => {
 const createBillPaymentMap = (bills: Bill[], transactions: Transaction[]): Map<string, number> => {
     const paymentMap = new Map<string, number>();
     
+    // Reuse getPaidAmount function to avoid code duplication
     bills.forEach(bill => {
-        const cycleTag = `(${bill.nextDueDate})`;
-        const paidAmount = transactions
-            .filter(t => t.billId === bill.id && t.description.includes(cycleTag))
-            .reduce((sum, t) => sum + t.amount, 0);
-        paymentMap.set(bill.id, paidAmount);
+        paymentMap.set(bill.id, getPaidAmount(bill, transactions));
     });
     
     return paymentMap;
