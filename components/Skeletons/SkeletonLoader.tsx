@@ -114,7 +114,7 @@ export const SkeletonCard: React.FC<SkeletonCardProps> = ({ type }) => {
           </div>
           <div className="grid grid-cols-4 gap-y-6 gap-x-2">
             {Array.from({ length: 5 }).map((_, index) => (
-              <div key={index} className="flex flex-col items-center gap-2">
+              <div key={`quick-action-${index}`} className="flex flex-col items-center gap-2">
                 <SkeletonLoader variant="circle" width="w-14" height="h-14" />
                 <SkeletonLoader variant="text" width="w-12" height="h-3" />
               </div>
@@ -132,7 +132,7 @@ export const SkeletonCard: React.FC<SkeletonCardProps> = ({ type }) => {
           </div>
           <div className="space-y-3">
             {Array.from({ length: 3 }).map((_, index) => (
-              <div key={index} className="flex items-center justify-between py-3">
+              <div key={`transaction-${index}`} className="flex items-center justify-between py-3">
                 <div className="flex items-center gap-4">
                   <SkeletonLoader variant="circle" width="w-12" height="h-12" />
                   <div className="space-y-1">

@@ -125,12 +125,21 @@ const GoalsPage: React.FC = () => {
     const [isSaving, setIsSaving] = useState(false);
 
     const goalsWithProgress = useMemo(() => {
-        return goals.map(goal => {
-            const savedAmount = transactions
-                .filter(t => t.goalId === goal.id)
-                .reduce((sum, t) => sum + t.amount, 0);
-            return { ...goal, currentAmount: savedAmount };
+        // Create a map of goalId to saved amount to avoid O(goals * transactions) complexity
+        const goalSavingsMap = new Map<string, number>();
+        
+        // Single pass through transactions to build the map
+        transactions.forEach(t => {
+            if (t.goalId) {
+                goalSavingsMap.set(t.goalId, (goalSavingsMap.get(t.goalId) || 0) + t.amount);
+            }
         });
+        
+        // Now map goals with their saved amounts from the pre-computed map
+        return goals.map(goal => ({
+            ...goal,
+            currentAmount: goalSavingsMap.get(goal.id) || 0
+        }));
     }, [transactions, goals]);
 
     const filteredGoals = useMemo(() => {

@@ -63,7 +63,7 @@ const DashboardSkeleton: React.FC = () => {
           </div>
           <div className="space-y-3">
             {Array.from({ length: 3 }).map((_, index) => (
-              <div key={index} className="flex items-center justify-between py-3">
+              <div key={`dashboard-transaction-${index}`} className="flex items-center justify-between py-3">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-gray-200 dark:bg-gray-600 animate-pulse" />
                   <div className="space-y-1">

@@ -74,7 +74,7 @@ const AIActionConfirmDialog: React.FC<AIActionConfirmDialogProps> = ({
                 <div className="p-5 space-y-3">
                     {preview.details.map((detail, index) => (
                         <div
-                            key={index}
+                            key={`${detail.label}-${index}`}
                             className="flex justify-between items-center py-2 px-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg"
                         >
                             <span className="text-sm text-gray-500 dark:text-gray-400">

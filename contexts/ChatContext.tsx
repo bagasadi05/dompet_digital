@@ -118,7 +118,10 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
             } else if (action.action.type === 'analyze_spending') {
                 const params = action.action.params as any;
                 let filtered = transactions.filter(t => t.type === TransactionType.EXPENSE);
-                if (params.type) filtered = transactions.filter(t => t.type === (params.type === 'pemasukan' ? TransactionType.INCOME : TransactionType.EXPENSE));
+                if (params.type) {
+                    // Continue filtering from filtered instead of restarting from transactions
+                    filtered = filtered.filter(t => t.type === (params.type === 'pemasukan' ? TransactionType.INCOME : TransactionType.EXPENSE));
+                }
 
                 if (params.startDate) filtered = filtered.filter(t => t.date >= params.startDate);
                 if (params.endDate) filtered = filtered.filter(t => t.date <= params.endDate);
