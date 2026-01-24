@@ -123,20 +123,20 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         processScheduledNotifications(bills, budgets, goals, transactions);
     }, [user, loading, bills, budgets, goals, transactions]);
 
-    const markAsRead = (notificationId: string) => {
+    const markAsRead = useCallback((notificationId: string) => {
         const readIds: string[] = JSON.parse(localStorage.getItem('readNotifications') || '[]');
         if (!readIds.includes(notificationId)) {
             const newReadIds = [...readIds, notificationId];
             localStorage.setItem('readNotifications', JSON.stringify(newReadIds));
             setNotifications(prev => prev.map(n => n.id === notificationId ? { ...n, isRead: true } : n));
         }
-    };
+    }, []);
 
-    const markAllAsRead = () => {
+    const markAllAsRead = useCallback(() => {
         const allIds = notifications.map(n => n.id);
         localStorage.setItem('readNotifications', JSON.stringify(allIds));
         setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
-    };
+    }, [notifications]);
 
     // CRUD Actions with Toast notifications
     const addTransaction = async (data: Omit<Transaction, 'id'>) => {
@@ -144,7 +144,15 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         try {
             const newTransaction = await api.addTransaction({ ...data, user_id: user.id });
             if (newTransaction) {
-                setTransactions(prev => [newTransaction, ...prev].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
+                // Insert transaction at the correct position instead of sorting entire array
+                setTransactions(prev => {
+                    const newDate = new Date(newTransaction.date).getTime();
+                    const insertIndex = prev.findIndex(t => new Date(t.date).getTime() < newDate);
+                    if (insertIndex === -1) {
+                        return [...prev, newTransaction];
+                    }
+                    return [...prev.slice(0, insertIndex), newTransaction, ...prev.slice(insertIndex)];
+                });
                 showToast({ type: 'success', title: 'Transaksi ditambahkan', message: `${data.description} berhasil disimpan.` });
             }
         } catch (error: any) {
@@ -157,7 +165,17 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         try {
             const updatedTransaction = await api.updateTransaction(data);
             if (updatedTransaction) {
-                setTransactions(prev => prev.map(t => t.id === data.id ? updatedTransaction : t).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
+                // Only resort if date changed, otherwise just update in place
+                setTransactions(prev => {
+                    const oldTransaction = prev.find(t => t.id === data.id);
+                    const updated = prev.map(t => t.id === data.id ? updatedTransaction : t);
+                    
+                    // If date changed, re-sort; otherwise return as-is
+                    if (oldTransaction && oldTransaction.date !== updatedTransaction.date) {
+                        return updated.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+                    }
+                    return updated;
+                });
                 showToast({ type: 'success', title: 'Transaksi diperbarui' });
             }
         } catch (error: any) {
@@ -274,7 +292,17 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         try {
             const updatedBill = await api.updateBill(data);
             if (updatedBill) {
-                setBills(prev => prev.map(b => b.id === data.id ? updatedBill : b).sort((a, b) => new Date(a.nextDueDate).getTime() - new Date(b.nextDueDate).getTime()));
+                // Only resort if due date changed, otherwise just update in place
+                setBills(prev => {
+                    const oldBill = prev.find(b => b.id === data.id);
+                    const updated = prev.map(b => b.id === data.id ? updatedBill : b);
+                    
+                    // If date changed, re-sort; otherwise return as-is
+                    if (oldBill && oldBill.nextDueDate !== updatedBill.nextDueDate) {
+                        return updated.sort((a, b) => new Date(a.nextDueDate).getTime() - new Date(b.nextDueDate).getTime());
+                    }
+                    return updated;
+                });
                 showToast({ type: 'success', title: 'Tagihan diperbarui' });
             }
         } catch (error: any) {

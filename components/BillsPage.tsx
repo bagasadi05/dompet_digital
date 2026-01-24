@@ -19,6 +19,18 @@ const getPaidAmount = (bill: Bill, transactions: Transaction[]): number => {
         .reduce((sum, t) => sum + t.amount, 0);
 };
 
+// Optimized: Create a map of bill payments to avoid O(n*m) complexity
+const createBillPaymentMap = (bills: Bill[], transactions: Transaction[]): Map<string, number> => {
+    const paymentMap = new Map<string, number>();
+    
+    // Reuse getPaidAmount function to avoid code duplication
+    bills.forEach(bill => {
+        paymentMap.set(bill.id, getPaidAmount(bill, transactions));
+    });
+    
+    return paymentMap;
+};
+
 const getDaysUntilDue = (nextDueDate: string, paidAmount: number, totalAmount: number): { days: number; text: string; urgency: 'overdue' | 'urgent' | 'soon' | 'ok' | 'paid' } => {
     // Tolerance for float precision
     if (paidAmount >= totalAmount - 1) return { days: 0, text: 'Lunas', urgency: 'paid' };
@@ -274,21 +286,23 @@ const BillsPage: React.FC = () => {
     }, [sortedBills, searchQuery]);
 
     const stats = useMemo(() => {
-        // Removed unused totalAmount calculation
+        // Create bill payment map once to avoid O(n*m) complexity
+        const paymentMap = createBillPaymentMap(bills, transactions);
+        
         // Calculate total unpaid amount considering partial payments
         let totalUnpaid = 0;
         bills.forEach(b => {
-            const paid = getPaidAmount(b, transactions);
+            const paid = paymentMap.get(b.id) || 0;
             totalUnpaid += Math.max(0, b.amount - paid);
         });
 
         const urgentCount = bills.filter(b => {
-            const paid = getPaidAmount(b, transactions);
+            const paid = paymentMap.get(b.id) || 0;
             return getDaysUntilDue(b.nextDueDate, paid, b.amount).urgency === 'urgent';
         }).length;
 
         const overdueCount = bills.filter(b => {
-            const paid = getPaidAmount(b, transactions);
+            const paid = paymentMap.get(b.id) || 0;
             return getDaysUntilDue(b.nextDueDate, paid, b.amount).urgency === 'overdue';
         }).length;
 
